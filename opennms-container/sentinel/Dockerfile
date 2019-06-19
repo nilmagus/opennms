@@ -43,6 +43,7 @@ RUN if [[ "$(ls -1 /tmp/rpms/*.rpm 2>/dev/null | wc -l)" != 0 ]]; then yum -y lo
     yum clean all && \
     rm -rf /var/cache/yum
 
+COPY ./assets/health.sh /
 COPY ./assets/entrypoint.sh /
 
 VOLUME [ "/opt/sentinel/deploy", "/opt/sentinel/etc", "/opt/sentinel/data" ]

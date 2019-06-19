@@ -48,6 +48,7 @@ RUN if [[ "$(ls -1 /tmp/rpms/*.rpm 2>/dev/null | wc -l)" != 0 ]]; then yum -y lo
     chgrp -R 0 /opt/minion && \
     chmod -R g=u /opt/minion
 
+COPY ./assets/health.sh /
 COPY ./assets/entrypoint.sh /
 
 ARG BUILD_DATE="1970-01-01T00:00:00+0000"
