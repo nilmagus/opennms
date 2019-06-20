@@ -28,17 +28,20 @@
 
 package org.opennms.smoketest;
 
- import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
- import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
- import org.junit.FixMethodOrder;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
- import org.openqa.selenium.By;
- import org.openqa.selenium.WebElement;
- import org.openqa.selenium.interactions.Actions;
- import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.rnorth.ducttape.unreliables.Unreliables;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MenuHeaderIT extends OpenNMSSeleniumIT {
@@ -144,18 +147,26 @@ public class MenuHeaderIT extends OpenNMSSeleniumIT {
     private void clickMenuItemWithIcon(String menuEntryName, String submenuText, String submenuHref) {
         try {
             setImplicitWait(5, TimeUnit.SECONDS);
-            final Actions action = new Actions(driver);
-            final WebElement headerElement = findElementByXpath(String.format("//li/a[@name='%s']", menuEntryName));
+            final AtomicInteger offset = new AtomicInteger(0);
+            Unreliables.retryUntilSuccess(30, TimeUnit.SECONDS, () -> {
+                // Find Header element and try to move there
+                final WebDriverWait shortWait = new WebDriverWait(getDriver(), 1);
+                final Actions action = new Actions(driver);
+                final WebElement headerElement = findElementByXpath(String.format("//li/a[@name='%s']", menuEntryName));
 
-            // Move to element to make sub menu visible
-            action.moveToElement(headerElement).perform();
+                // Move to element to make sub menu visible
+                action.moveToElement(headerElement, offset.get(), offset.get()).build().perform();
+                if (offset.incrementAndGet() > 10) {
+                    offset.set(0);
+                }
 
-            // Wait until sub menu element is visible, then click
-            final WebElement submenuElement = headerElement.findElement(By.xpath(String.format("./../div/a[contains(@class, 'dropdown-item') and contains(@href, '%s')]", submenuHref)));
-            this.wait.until(ExpectedConditions.visibilityOf(submenuElement));
-            assertEquals(submenuText, submenuElement.getText().trim());
-            submenuElement.click();
-
+                // Wait until sub menu element is visible, then click
+                final WebElement submenuElement = headerElement.findElement(By.xpath(String.format("./../div/a[contains(@class, 'dropdown-item') and contains(@href, '%s')]", submenuHref)));
+                shortWait.until(ExpectedConditions.visibilityOf(submenuElement));
+                assertEquals(submenuText, submenuElement.getText().trim());
+                submenuElement.click();
+                return null;
+            });
         } finally {
             setImplicitWait();
         }
