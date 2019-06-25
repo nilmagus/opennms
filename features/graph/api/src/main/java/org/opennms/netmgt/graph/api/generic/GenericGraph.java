@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import org.opennms.netmgt.graph.api.Graph;
 import org.opennms.netmgt.graph.api.Vertex;
 import org.opennms.netmgt.graph.api.VertexRef;
-import org.opennms.netmgt.graph.api.context.DefaultGraphContext;
 import org.opennms.netmgt.graph.api.focus.Focus;
 import org.opennms.netmgt.graph.api.info.GraphInfo;
 
@@ -55,10 +54,9 @@ public class GenericGraph extends GenericElement implements Graph<GenericVertex,
     private final DirectedSparseGraph<VertexRef, GenericEdge> jungGraph = new DirectedSparseGraph<>();
     private final Map<String, GenericVertex> vertexToIdMap = new HashMap<>();
     private final Map<String, GenericEdge> edgeToIdMap = new HashMap<>();
+    private final List<Vertex> defaultFocus;
 //    private final Map<NodeRef, V> nodeRefToVertexMap = new HashMap<>();
 
-    // A calculation of the focus
-    private Focus focusStrategy;
     protected GraphInfo<GenericVertex> graphInfo;
 
     public GenericGraph(String namespace) {
@@ -78,7 +76,7 @@ public class GenericGraph extends GenericElement implements Graph<GenericVertex,
                 .withProperties(copyMe.properties)
                 .withProperty(GenericProperties.NAMESPACE, newNamespace)
                 .build());
-        this.setFocusStrategy(copyMe.focusStrategy);
+        this.defaultFocus = new ArrayList<>(copyMe.defaultFocus);
         for(GenericVertex originalVertex : copyMe.vertexToIdMap.values()){
             this.addVertex(new GenericVertex(originalVertex, newNamespace));
         }
@@ -90,9 +88,10 @@ public class GenericGraph extends GenericElement implements Graph<GenericVertex,
     public GenericGraph(Map<String, Object> properties) {
         super(properties);
         this.graphInfo = new GenericGraphInfo();
+        this.defaultFocus = new ArrayList<>();
     }
 
-    public static GenericGraph fromGraphInfo(GraphInfo graphInfo) {
+    public static GenericGraph fromGraphInfo(GraphInfo<?> graphInfo) {
         // we can't have a constructor GenericGraph(GraphInfo graphInfo) since it conflicts with GenericGraph(GenericGraph graph)
         // that's why we have a factory method instead
         GenericGraph graph = new GenericGraph(graphInfo.getNamespace());
@@ -129,7 +128,7 @@ public class GenericGraph extends GenericElement implements Graph<GenericVertex,
         setProperty(GenericProperties.DESCRIPTION, description);
     }
 
-    public GraphInfo getGraphInfo(){
+    public GraphInfo<GenericVertex> getGraphInfo(){
         return graphInfo;
     }
 
@@ -150,20 +149,40 @@ public class GenericGraph extends GenericElement implements Graph<GenericVertex,
 
     @Override
     public List<Vertex> getDefaultFocus() {
-        if (focusStrategy != null) {
-            return focusStrategy.getFocus(new DefaultGraphContext(this)).stream().map(vr -> vertexToIdMap.get(vr.getId())).collect(Collectors.toList());
-        }
-        return new ArrayList<>();
+        return this.defaultFocus;
     }
 
+    public void setDefaultFocus(List<GenericVertex> defaultFocus) {
+        Objects.requireNonNull(defaultFocus);
+        // make sure we defaultFocus vertices are really part of this graph
+        for(GenericVertex vertex : defaultFocus) {
+            GenericVertex existingVertex = this.vertexToIdMap.get(vertex.getId());
+            if(!vertex.equals(existingVertex)) {
+                throw new IllegalArgumentException(String.format("Vertex %s is not part of this graph. Cannot set it as default focus.", vertex.getVertexRef()));
+            }
+        }
+    }
+    
+    /**
+     * Convenience method for:
+     * defaultFocus = focus.getFocus(graph)
+     * graph.setDefaultFocus(defaultFocus)
+     * TODO: Discuss with mvr: do we want to provide this method?
+     */
+    public void applyFocusStrategy(Focus focus) {
+        List<GenericVertex> defaultFocus = focus.getFocus(this);
+        this.setDefaultFocus(defaultFocus);
+    }
+    
+//  if (focusStrategy != null) {
+//  return focusStrategy.getFocus(new DefaultGraphContext(this)).stream().map(vr -> vertexToIdMap.get(vr.getId())).collect(Collectors.toList());
+//}
+//return new ArrayList<>();
+    
 //    @Override
 //    public Vertex getVertex(NodeRef nodeRef) {
 //        return nodeRefToVertexMap.get(nodeRef);
 //    }
-
-    public void setFocusStrategy(Focus focusStrategy) {
-        this.focusStrategy = focusStrategy; // TODO MVR verify persistence of this
-    }
 
     @Override
     public void addEdges(Collection<GenericEdge> edges) {
@@ -229,6 +248,7 @@ public class GenericGraph extends GenericElement implements Graph<GenericVertex,
         Objects.requireNonNull(vertex);
         jungGraph.removeVertex(vertex.getVertexRef());
         vertexToIdMap.remove(vertex.getId());
+        this.defaultFocus.remove(vertex);
     }
 
     @Override
@@ -317,13 +337,13 @@ public class GenericGraph extends GenericElement implements Graph<GenericVertex,
         GenericGraph that = (GenericGraph) o;
         return Objects.equals(vertexToIdMap, that.vertexToIdMap)
                 && Objects.equals(edgeToIdMap, that.edgeToIdMap)
-                && Objects.equals(focusStrategy, that.focusStrategy);
+                && Objects.equals(defaultFocus, that.defaultFocus);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(),
-                vertexToIdMap, edgeToIdMap, focusStrategy);
+                vertexToIdMap, edgeToIdMap, defaultFocus);
     }
 
     private class GenericGraphInfo implements GraphInfo<GenericVertex> {

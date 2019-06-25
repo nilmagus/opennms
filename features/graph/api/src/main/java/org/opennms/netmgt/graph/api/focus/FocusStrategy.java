@@ -39,27 +39,47 @@ import org.opennms.netmgt.graph.api.Vertex;
 
 import com.google.common.collect.Lists;
 
-// TODO MVR make this persistable
 public class FocusStrategy {
-    public static final Focus ALL = graphContext -> graphContext.getGraph().getVertices();
-
-    public static final Focus EMPTY = graphContext -> Lists.newArrayList();
-
-    public static final Focus FIRST = graphContext -> {
-        final Graph<Vertex, Edge> g = graphContext.getGraph();
-        if (g.getVertexIds().isEmpty()) {
-            return new ArrayList<>();
+    
+    public static final Focus ALL = new Focus() {
+        
+        @Override
+        public <V extends Vertex> List<V> getFocus(Graph<V, ? extends Edge> graph) {
+            return graph.getVertices().parallelStream().collect(Collectors.toList());
         }
-        final Vertex vertex = g.getVertices().get(0);
-        return Lists.newArrayList(vertex.getVertexRef());
     };
 
-    public static final Focus SPECIFIC(Collection<String> vertexIds) {
-        return graphContext -> {
-            final List<Vertex> list = graphContext.getGraph().resolveVertices(vertexIds);
-            return list.stream()
-                    .map(Vertex::getVertexRef)
-                    .collect(Collectors.toList());
-        };
+    public static final Focus EMPTY = new Focus() {    
+        @Override
+        public <V extends Vertex> List<V> getFocus(Graph<V, ? extends Edge> graph) {
+            return Lists.newArrayList();
+        }
+    };
+    
+    public static final Focus FIRST = new Focus() {
+        
+        @Override
+        public <V extends Vertex> List<V> getFocus(Graph<V, ? extends Edge> graph) {
+            if (graph.getVertexIds().isEmpty()) {
+                return new ArrayList<>();
+            }
+            final V vertex = graph.getVertices().get(0);
+            return Lists.newArrayList(vertex);
+        }
+    }; 
+        
+    public final static class SpecificFocus implements Focus {
+        
+        private final Collection<String> vertexIds;
+        
+        public SpecificFocus(Collection<String> vertexIds) {
+            this.vertexIds = vertexIds;
+        }
+        
+        @Override
+        public <V extends Vertex> List<V> getFocus(Graph<V, ? extends Edge> graph) {
+            return graph.resolveVertices(vertexIds);
+        }
+
     }
 }

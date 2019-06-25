@@ -34,7 +34,7 @@ import java.util.List;
 import org.opennms.netmgt.graph.api.generic.GenericGraph;
 import org.opennms.netmgt.graph.api.info.GraphInfo;
 
-public interface Graph<V extends Vertex, E extends Edge> extends GraphInfo {
+public interface Graph<V extends Vertex, E extends Edge> extends GraphInfo<V> {
 
     List<V> getVertices();
 

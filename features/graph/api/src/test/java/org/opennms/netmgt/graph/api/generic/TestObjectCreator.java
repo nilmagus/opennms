@@ -28,6 +28,8 @@
 
 package org.opennms.netmgt.graph.api.generic;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -72,19 +74,25 @@ public class TestObjectCreator {
         GenericVertex vertex3 = createVertex();
         GenericEdge edge1 = createEdge(vertex1, vertex2);
         GenericEdge edge2 = createEdge(vertex1, vertex3);
-
+        List<GenericVertex> vertices = Arrays.asList(vertex1, vertex2, vertex3);
+        List<GenericEdge> edges =  Arrays.asList(edge1, edge2);
+        return createGraph(vertices, edges);
+    }
+    
+    public static GenericGraph createGraph(List<GenericVertex> vertices, List<GenericEdge> edges) {
+        GenericGraph graph = createEmptyGraph();
+        graph.addVertices(vertices);
+        graph.addEdges(edges);
+        graph.setDefaultFocus(FocusStrategy.FIRST.getFocus(graph));
+        return graph;
+    }
+    
+    public static GenericGraph createEmptyGraph() {
         GenericGraph graph = new GenericGraph(NAMESPACE);
         graph.setId("GraphId" + UUID.randomUUID().toString());
         graph.setDescription("GraphDescription" + UUID.randomUUID().toString());
         graph.setLabel("GraphLabel" + UUID.randomUUID().toString());
-        graph.setFocusStrategy(FocusStrategy.FIRST);
         graph.setProperty("someProperty", "someProperty" + UUID.randomUUID().toString());
-        graph.addVertex(vertex1);
-        graph.addVertex(vertex2);
-        graph.addVertex(vertex3);
-        graph.addEdge(edge1);
-        graph.addEdge(edge2);
-
         return graph;
     }
 

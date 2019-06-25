@@ -30,11 +30,11 @@ package org.opennms.netmgt.graph.api.focus;
 
 import java.util.List;
 
-import org.opennms.netmgt.graph.api.VertexRef;
-import org.opennms.netmgt.graph.api.context.GraphContext;
+import org.opennms.netmgt.graph.api.Edge;
+import org.opennms.netmgt.graph.api.Graph;
+import org.opennms.netmgt.graph.api.Vertex;
 
-// TODO MVR this is not persistable
 public interface Focus {
 
-    List<VertexRef> getFocus(GraphContext graphContext);
+    <V extends Vertex> List<V> getFocus(Graph<V, ? extends Edge> graph);
 }
