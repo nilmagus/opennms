@@ -372,6 +372,7 @@ jobs:
           command: |
             echo JAVA_HOME=$JAVA_HOME
             export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+            sudo apt -y install openjdk-11-jdk
             .circleci/scripts/itest.sh
       - run:
           name: Gather test results
