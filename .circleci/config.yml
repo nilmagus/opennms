@@ -103,6 +103,8 @@ commands:
           name: Smoke Tests
           no_output_timeout: 30m
           command: |
+            echo JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
             .circleci/scripts/smoke.sh << parameters.minimal >>
       - run:
           name: Gather test artifacts
@@ -203,6 +205,8 @@ jobs:
       - run:
           name: Compile OpenNMS
           command: |
+            echo JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
             mvn clean -DskipTests=true
             ./compile.pl -DskipTests=true -Dbuild.skip.tarball=true
       - run:
@@ -212,6 +216,8 @@ jobs:
           # so that the artifacts required to run the smoke tests are cached as well without the need
           # to maintain another cache
           command: |
+            echo JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
             cd smoke-test && mvn install -DskipTests=true -DskipITs=true
       - save-maven-cache
       - save-nodejs-cache
@@ -229,6 +235,8 @@ jobs:
       - run:
           name: Build RPMs
           command: |
+            echo JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
             ./makerpm.sh -a -d
       - store_artifacts:
           path: ~/project/target/rpm/RPMS/noarch
@@ -248,6 +256,8 @@ jobs:
       - run:
           name: Fetch RPM artifacts and build Horizon container image
           command: |
+            echo JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
             cd opennms-container/horizon
             ./build_container_image.sh
       - store_artifacts:
@@ -268,6 +278,8 @@ jobs:
       - run:
           name: Fetch RPM artifacts and build Minion container image
           command: |
+            echo JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
             cd opennms-container/minion
             ./build_container_image.sh
       - store_artifacts:
@@ -288,6 +300,8 @@ jobs:
       - run:
           name: Fetch RPM artifacts and build Sentinel container image
           command: |
+            echo JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
             cd opennms-container/sentinel
             ./build_container_image.sh
       - store_artifacts:
@@ -356,6 +370,8 @@ jobs:
           name: Integration Tests
           no_output_timeout: 1.0h
           command: |
+            echo JAVA_HOME=$JAVA_HOME
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
             .circleci/scripts/itest.sh
       - run:
           name: Gather test results
