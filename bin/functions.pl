@@ -337,7 +337,7 @@ sub find_git {
 }
 
 sub get_minimum_java {
-	my $minimum_java = '1.8';
+	my $minimum_java = '11';
 
 	my $pomfile = File::Spec->catfile($PREFIX, 'pom.xml');
 	if (-e $pomfile) {
