@@ -371,8 +371,9 @@ jobs:
           no_output_timeout: 1.0h
           command: |
             echo JAVA_HOME=$JAVA_HOME
-            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk
+            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
             sudo apt -y install openjdk-11-jdk
+            ls -l ${JAVA_HOME} ${JAVA_HOME}/bin
             .circleci/scripts/itest.sh
       - run:
           name: Gather test results
