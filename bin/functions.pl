@@ -385,6 +385,8 @@ sub get_version_from_java {
 	my ($output, $bindir, $shortversion, $version, $build, $java_home);
 
 	$output = `"$javacmd" -version 2>\&1`;
+	printf "DEBUG: java -version:\n";
+        printf "DEBUG: $output\n";
 	($version) = $output =~ / version \"?([\d\.]+?(?:[\+\-\_]\S+?)?)\"?(?: \d\d\d\d-\d\d-\d\d)?$/ms;
 	if (defined $version) {
 		($version, $build) = $version =~ /^([\d\.]+)(?:[\+\-\_](.*?))?$/;
