@@ -150,7 +150,7 @@ public class HeartbeatSinkPerfIT {
         when(sqsManager.sendMessage(anyString(), anyString())).thenAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
-                String body = invocation.getArgumentAt(1, String.class);
+                String body = invocation.getArgument(1, String.class);
                 bodies.add(body);
                 return null;
             }
