@@ -152,6 +152,7 @@ workflows:
             - build-horizon-oci
             - build-minion-oci
             - build-sentinel-oci
+            - integration-test
           filters:
             branches:
               only:
@@ -166,6 +167,7 @@ workflows:
             - build-horizon-oci
             - build-minion-oci
             - build-sentinel-oci
+            - integration-test
       - publish-horizon-oci:
           requires:
             - build-horizon-oci
