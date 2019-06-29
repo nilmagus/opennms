@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2011-2014 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2014 The OpenNMS Group, Inc.
+ * Copyright (C) 2011-2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -65,36 +65,36 @@ public class EventConstantsTest {
                             {
                                 new Locale("en", "US"),
                                 TimeZone.getTimeZone("CET"),
-                                "Thursday, March 10, 2011 10:40:37 PM GMT",
-                                "Thursday, March 10, 2011 11:40:37 PM CET",
+                                "Thursday, March 10, 2011 at 10:40:37 PM GMT",
+                                "Thursday, March 10, 2011 at 11:40:37 PM CET",
                                 Long.valueOf(1299796837 * 1000L)
                             },
                             {
                                 new Locale("it", "IT"),
                                 TimeZone.getTimeZone("CET"),
-                                "gioved\u00EC 10 marzo 2011 22.40.37 GMT",
-                                "gioved\u00EC 10 marzo 2011 23.40.37 CET",
+                                "gioved\u00EC 10 marzo 2011 22:40:37 GMT",
+                                "gioved\u00EC 10 marzo 2011 23:40:37 CET",
                                 Long.valueOf(1299796837 * 1000L)
                             },
                             {
                                 new Locale("fr", "FR"),
                                 TimeZone.getTimeZone("CET"),
-                                "jeudi 10 mars 2011 22:40:37 GMT",
-                                "jeudi 10 mars 2011 23:40:37 CET",
+                                "jeudi 10 mars 2011 à 22:40:37 GMT",
+                                "jeudi 10 mars 2011 à 23:40:37 CET",
                                 Long.valueOf(1299796837 * 1000L)
                             },
                             {
                                 new Locale("fr", "CA"),
                                 TimeZone.getTimeZone("CET"),
-                                "jeudi 10 mars 2011 22:40:37 GMT",
-                                "jeudi 10 mars 2011 23:40:37 CET",
+                                "jeudi 10 mars 2011 à 22 h 40 min 37 s GMT",
+                                "jeudi 10 mars 2011 à 23 h 40 min 37 s CET",
                                 Long.valueOf(1299796837 * 1000L)
                             },
                             {
                                 new Locale("de", "DE"),
                                 TimeZone.getTimeZone("CET"),
-                                "Donnerstag, 10. M\u00E4rz 2011 22:40:37 GMT",
-                                "Donnerstag, 10. M\u00E4rz 2011 23:40:37 MEZ",
+                                "Donnerstag, 10. M\u00E4rz 2011 um 22:40:37 GMT",
+                                "Donnerstag, 10. M\u00E4rz 2011 um 23:40:37 MEZ",
                                 Long.valueOf(1299796837 * 1000L)
                             }
             });
