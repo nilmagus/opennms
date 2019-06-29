@@ -93,7 +93,7 @@ public class SecurityHelperTest {
         SecurityContext securityContext = mock(SecurityContext.class, RETURNS_DEEP_STUBS);
         when(securityContext.getUserPrincipal().getName()).thenReturn(USER);
         when(securityContext.isUserInRole(anyString())).thenAnswer((Answer) invocation -> {
-            final String role = invocation.getArgumentAt(0, String.class);
+            final String role = invocation.getArgument(0, String.class);
             return userRoles.contains(role);
         });
 

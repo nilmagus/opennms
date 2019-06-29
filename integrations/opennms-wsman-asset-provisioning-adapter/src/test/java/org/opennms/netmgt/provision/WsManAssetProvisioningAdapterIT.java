@@ -118,9 +118,9 @@ public class WsManAssetProvisioningAdapterIT {
         when(clientFactory.getClient(any(WSManEndpoint.class))).thenReturn(client);
 
         when(client.enumerateAndPullUsingFilter(any(), any(), any(), any(), anyBoolean())).then((Answer) invocation -> {
-            final String query = invocation.getArgumentAt(2, String.class);
+            final String query = invocation.getArgument(2, String.class);
             @SuppressWarnings("unchecked")
-            final List<Node> nodes = (List<Node>)invocation.getArgumentAt(3, List.class);
+            final List<Node> nodes = (List<Node>)invocation.getArgument(3, List.class);
 
             Node node = mock(Node.class);
             when(node.getTextContent()).thenReturn("Wesley");
