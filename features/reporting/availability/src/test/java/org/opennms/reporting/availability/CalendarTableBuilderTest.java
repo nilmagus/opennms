@@ -57,7 +57,7 @@ public class CalendarTableBuilderTest extends TestCase {
 		CalendarTableBuilder builder = new CalendarTableBuilder(2005,05);
 		CalendarTable section = builder.getTable();
 		DaysOfWeek days = section.getDaysOfWeek();
-		assertEquals(days.getDayName(0),"lun.");
+		assertEquals(days.getDayName(0),"dim.");
 		}
 	public void testLocaleEnUs() {
 		Locale.setDefault(Locale.US);
