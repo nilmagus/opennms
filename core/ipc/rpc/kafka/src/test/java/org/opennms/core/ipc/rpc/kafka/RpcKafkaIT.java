@@ -64,6 +64,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.opennms.core.ipc.common.kafka.OsgiKafkaConfigProvider;
+import org.opennms.core.ipc.rpc.kafka.client.KafkaRpcClientFactory;
+import org.opennms.core.ipc.rpc.kafka.server.KafkaRpcServerManager;
 import org.opennms.core.rpc.api.RemoteExecutionException;
 import org.opennms.core.rpc.api.RequestTimedOutException;
 import org.opennms.core.rpc.echo.EchoRequest;

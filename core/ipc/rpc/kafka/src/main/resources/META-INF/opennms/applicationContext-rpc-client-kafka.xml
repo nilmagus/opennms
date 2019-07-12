@@ -26,8 +26,8 @@
     <property name="targetMethod" value="getLocation"/>
   </bean>
 
-  <bean id="kafkaRpcClientFactory" class="org.opennms.core.ipc.rpc.kafka.KafkaRpcClientFactory" primary="true"
-    init-method="start" destroy-method="stop" >
+  <bean id="kafkaRpcClientFactory" class="org.opennms.core.ipc.rpc.kafka.client.KafkaRpcClientFactory" primary="true"
+        init-method="start" destroy-method="stop" >
      <property name="location" ref="location"/>
   </bean>
 

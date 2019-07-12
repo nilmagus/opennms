@@ -31,7 +31,7 @@
       <argument ref="configAdmin"/>
     </bean>
 
-    <bean id="kafkaRpcServerManager" class="org.opennms.core.ipc.rpc.kafka.KafkaRpcServerManager"
+    <bean id="kafkaRpcServerManager" class="org.opennms.core.ipc.rpc.kafka.server.KafkaRpcServerManager"
           init-method="init" destroy-method="destroy">
       <argument ref="kafkaConfigProvider"/>
       <argument ref="minionIdentity"/>
