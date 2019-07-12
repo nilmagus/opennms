@@ -123,12 +123,14 @@ public class RpcKafkaIT {
     @Before
     public void setup() throws Exception {
         System.setProperty(String.format("%s%s", KAFKA_CONFIG_PID, ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG), kafkaServer.getKafkaConnectString());
+        // This setting is only valid for tests as we don't want to miss any messages if there is gap between start of kafka producer/consumer
         System.setProperty(String.format("%s%s", KAFKA_CONFIG_PID, ConsumerConfig.AUTO_OFFSET_RESET_CONFIG), "earliest");
         rpcClient = new KafkaRpcClientFactory();
         rpcClient.setTracerRegistry(tracerRegistry);
         echoClient = new MockEchoClient(rpcClient);
         rpcClient.start();
         kafkaConfig.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer.getKafkaConnectString());
+        // This setting is only valid for tests as we don't want to miss any messages if there is gap between start of kafka producer/consumer
         kafkaConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         ConfigurationAdmin configAdmin = mock(ConfigurationAdmin.class, RETURNS_DEEP_STUBS);
         when(configAdmin.getConfiguration(KafkaRpcConstants.KAFKA_CONFIG_PID).getProperties())

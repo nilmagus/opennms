@@ -126,11 +126,8 @@ public class KafkaRpcServerManager {
     public void init() throws IOException {
         // group.id is mapped to minion location, so one of the minion executes the request.
         kafkaConfig.put(ConsumerConfig.GROUP_ID_CONFIG, minionIdentity.getLocation());
-        kafkaConfig.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
         kafkaConfig.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getCanonicalName());
         kafkaConfig.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getCanonicalName());
-        kafkaConfig.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "1000");
-        kafkaConfig.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         kafkaConfig.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getCanonicalName());
         kafkaConfig.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, ByteArraySerializer.class.getCanonicalName());
         // Retrieve all of the properties from org.opennms.core.ipc.rpc.kafka.cfg
@@ -227,7 +224,8 @@ public class KafkaRpcServerManager {
                 consumer.subscribe(Arrays.asList(topic));
                 LOG.info("subscribed to topic {}", topic);
                 while (!closed.get()) {
-                    ConsumerRecords<String, byte[]> records = consumer.poll(Long.MAX_VALUE);
+                    // Wait till something is available.
+                    ConsumerRecords<String, byte[]> records = consumer.poll(java.time.Duration.ofMillis(Long.MAX_VALUE));
                     for (ConsumerRecord<String, byte[]> record : records) {  
                         try {
                             RpcMessageProtos.RpcMessage rpcMessage = RpcMessageProtos.RpcMessage
