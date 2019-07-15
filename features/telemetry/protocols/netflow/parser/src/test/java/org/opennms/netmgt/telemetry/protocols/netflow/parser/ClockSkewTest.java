@@ -29,6 +29,7 @@
 package org.opennms.netmgt.telemetry.protocols.netflow.parser;
 
 import java.net.InetAddress;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Assert;
@@ -38,6 +39,7 @@ import org.opennms.core.ipc.sink.api.AsyncDispatcher;
 import org.opennms.distributed.core.api.Identity;
 import org.opennms.netmgt.events.api.EventForwarder;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Log;
 
@@ -85,6 +87,14 @@ public class ClockSkewTest {
         }
     };
 
+    private DnsResolver dnsResolver = new DnsResolver() {
+
+        @Override
+        public Optional<String> reverseLookup(InetAddress inetAddress) {
+            return Optional.empty();
+        }
+    };
+
     private ParserBase parserBase = new ParserBase(Protocol.NETFLOW5, "name", new AsyncDispatcher<TelemetryMessage>() {
         @Override
         public CompletableFuture<TelemetryMessage> send(TelemetryMessage message) {
@@ -100,7 +110,7 @@ public class ClockSkewTest {
         public void close() {
 
         }
-    }, eventForwarder, identity);
+    }, eventForwarder, identity, dnsResolver);
 
     @Before
     public void reset() {

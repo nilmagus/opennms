@@ -40,6 +40,7 @@ import org.opennms.distributed.core.api.Identity;
 import org.opennms.netmgt.events.api.EventForwarder;
 import org.opennms.netmgt.telemetry.api.receiver.Dispatchable;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.listeners.UdpParser;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.RecordProvider;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ipfix.proto.Header;
@@ -55,8 +56,9 @@ public class IpfixUdpParser extends UdpParserBase implements UdpParser, Dispatch
     public IpfixUdpParser(final String name,
                           final AsyncDispatcher<TelemetryMessage> dispatcher,
                           final EventForwarder eventForwarder,
-                          final Identity identity) {
-        super(Protocol.IPFIX, name, dispatcher, eventForwarder, identity);
+                          final Identity identity,
+                          final DnsResolver dnsResolver) {
+        super(Protocol.IPFIX, name, dispatcher, eventForwarder, identity, dnsResolver);
     }
 
     @Override

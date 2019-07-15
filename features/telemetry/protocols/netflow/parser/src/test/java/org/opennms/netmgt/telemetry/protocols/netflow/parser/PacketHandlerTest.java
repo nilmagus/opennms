@@ -37,6 +37,7 @@ import java.util.Optional;
 import org.bson.RawBsonDocument;
 import org.junit.Assert;
 import org.junit.Test;
+import org.opennms.netmgt.telemetry.common.utils.NullDnsResolver;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ParserBase;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.Protocol;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.Semantics;
@@ -88,7 +89,7 @@ public class PacketHandlerTest {
                 )
         );
 
-        final ByteBuffer output = ParserBase.serialize(Protocol.IPFIX, record);
+        final ByteBuffer output = ParserBase.serialize(Protocol.IPFIX, record, new NullDnsResolver());
 
         final RawBsonDocument bson = new RawBsonDocument(output.array());
 

@@ -88,7 +88,7 @@ public class UdpListener implements Listener {
     }
 
     public void start() throws InterruptedException {
-        this.bossGroup = new NioEventLoopGroup();
+        this.bossGroup = new NioEventLoopGroup(10);
 
         this.parsers.forEach(parser -> parser.start(this.bossGroup));
 

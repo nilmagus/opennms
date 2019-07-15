@@ -36,7 +36,6 @@ import java.util.Optional;
 
 import org.opennms.core.utils.InetAddressUtils;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xbill.DNS.Cache;
@@ -49,41 +48,38 @@ import org.xbill.DNS.Type;
 
 import com.google.common.base.Strings;
 
-public class DnsUtils {
-    private static final Logger LOG = LoggerFactory.getLogger(DnsUtils.class);
-    public static final String DNS_PRIMARY_SERVER = "org.opennms.features.telemetry.dns.primaryServer";
-    public static final String DNS_SECONDARY_SERVER = "org.opennms.features.telemetry.dns.secondaryServer";
-    public static final String DNS_ENABLE = "org.opennms.features.telemetry.dns.enable";
-    public static final String DNS_CACHE_COUNT = "org.opennms.features.telemetry.dns.cache.count";
-    public static final String DNS_CACHE_MAX_TTL = "org.opennms.features.telemetry.dns.cache.maxttl";
-    public static final int DNS_CACHE_COUNT_DEFAULT = 50000;
+public class DefaultDnsResolver implements DnsResolver {
+    private static final Logger LOG = LoggerFactory.getLogger(DefaultDnsResolver.class);
+    static final String DNS_PRIMARY_SERVER = "org.opennms.features.telemetry.dns.primaryServer";
+    static final String DNS_SECONDARY_SERVER = "org.opennms.features.telemetry.dns.secondaryServer";
+    static final String DNS_ENABLE = "org.opennms.features.telemetry.dns.enable";
+    static final String DNS_CACHE_COUNT = "org.opennms.features.telemetry.dns.cache.count";
+    static final String DNS_CACHE_MAX_TTL = "org.opennms.features.telemetry.dns.cache.maxttl";
+    static final int DNS_CACHE_COUNT_DEFAULT = 50000;
 
-    private static ExtendedResolver resolver;
-    private static Cache cache = new Cache();
+    private ExtendedResolver resolver;
+    private Cache cache = new Cache();
 
-    private static String primaryServer = null, secondaryServer = null;
-    private static boolean enable = false;
-    private static int cacheCount = 50000;
-    private static int cacheMaxTTL = -1;
+    private String primaryServer = null, secondaryServer = null;
+    private boolean enable = false;
+    private int cacheCount = 50000;
+    private int cacheMaxTTL = -1;
 
-    static BundleContext bundleContext;
+    private final BundleContext bundleContext;
 
-    static {
+    public DefaultDnsResolver(BundleContext bundleContext) {
+        this.bundleContext = Objects.requireNonNull(bundleContext);
+
         try {
             resolver = new ExtendedResolver();
         } catch (UnknownHostException e) {
             LOG.debug("Cannot create resolver: {}", e.getMessage());
         }
 
-        try {
-            bundleContext = FrameworkUtil.getBundle(DnsUtils.class).getBundleContext();
-        } catch (NullPointerException e) {
-            LOG.debug("BundleContext not available: {}", e.getMessage());
-        }
+        loadConfiguration();
     }
 
-
-    private static void checkSystemProperties() {
+    private void loadConfiguration() {
         if (bundleContext == null) {
             return;
         }
@@ -92,28 +88,28 @@ public class DnsUtils {
         final String secondaryServer = bundleContext.getProperty(DNS_SECONDARY_SERVER);
         final boolean enable = Boolean.parseBoolean(bundleContext.getProperty(DNS_ENABLE));
 
-        if (enable != DnsUtils.enable || !Objects.equals(primaryServer, DnsUtils.primaryServer) || !Objects.equals(secondaryServer, DnsUtils.secondaryServer)) {
-            DnsUtils.enable = enable;
-            DnsUtils.primaryServer = primaryServer;
-            DnsUtils.secondaryServer = secondaryServer;
-            setDnsServers(DnsUtils.primaryServer, DnsUtils.secondaryServer);
+        if (enable != this.enable || !Objects.equals(primaryServer, this.primaryServer) || !Objects.equals(secondaryServer, this.secondaryServer)) {
+            this.enable = enable;
+            this.primaryServer = primaryServer;
+            this.secondaryServer = secondaryServer;
+            setDnsServers(primaryServer, secondaryServer);
         }
 
         final int cacheCount = Optional.ofNullable(bundleContext.getProperty(DNS_CACHE_COUNT)).map(Integer::parseInt).orElse(DNS_CACHE_COUNT_DEFAULT);
         final int cacheMaxTTL = Optional.ofNullable(bundleContext.getProperty(DNS_CACHE_MAX_TTL)).map(Integer::parseInt).orElse(-1);
 
-        if (cacheCount != DnsUtils.cacheCount || cacheMaxTTL != DnsUtils.cacheMaxTTL) {
-            DnsUtils.cacheCount = cacheCount;
-            DnsUtils.cacheMaxTTL = cacheMaxTTL;
+        if (cacheCount != this.cacheCount || cacheMaxTTL != this.cacheMaxTTL) {
+            this.cacheCount = cacheCount;
+            this.cacheMaxTTL = cacheMaxTTL;
 
-            DnsUtils.cache = new Cache();
-            DnsUtils.cache.setMaxEntries(DnsUtils.cacheCount);
-            DnsUtils.cache.setMaxCache(DnsUtils.cacheMaxTTL);
-            DnsUtils.cache.setMaxNCache(DnsUtils.cacheMaxTTL);
+            this.cache = new Cache();
+            this.cache.setMaxEntries(cacheCount);
+            this.cache.setMaxCache(cacheMaxTTL);
+            this.cache.setMaxNCache(cacheMaxTTL);
         }
     }
 
-    public static synchronized void setDnsServers(String... dnsServers) {
+    public synchronized void setDnsServers(String... dnsServers) {
         final String[] notNullDnsServers = (dnsServers == null ? new String[]{} : Arrays.stream(dnsServers)
                 .filter(e -> !Strings.isNullOrEmpty(e))
                 .toArray(String[]::new)
@@ -130,18 +126,21 @@ public class DnsUtils {
         }
     }
 
-    static ExtendedResolver getResolver() {
+    public boolean isEnabled() {
+        return enable;
+    }
+
+    ExtendedResolver getResolver() {
         return resolver;
     }
 
-    public static Optional<String> reverseLookup(final String inetAddress) {
+    public Optional<String> reverseLookup(final String inetAddress) {
         return reverseLookup(InetAddressUtils.addr(inetAddress));
     }
 
-    public static Optional<String> reverseLookup(final InetAddress inetAddress) {
-        checkSystemProperties();
-
-        if (!DnsUtils.enable) {
+    @Override
+    public Optional<String> reverseLookup(final InetAddress inetAddress) {
+        if (!enable) {
             return Optional.empty();
         }
 

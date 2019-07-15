@@ -41,6 +41,7 @@ import org.opennms.netmgt.events.api.EventForwarder;
 import org.opennms.netmgt.telemetry.api.receiver.Dispatchable;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.listeners.UdpParser;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Header;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Packet;
@@ -50,8 +51,9 @@ public class Netflow5UdpParser extends ParserBase implements UdpParser, Dispatch
     public Netflow5UdpParser(final String name,
                              final AsyncDispatcher<TelemetryMessage> dispatcher,
                              final EventForwarder eventForwarder,
-                             final Identity identity) {
-        super(Protocol.NETFLOW5, name, dispatcher, eventForwarder, identity);
+                             final Identity identity,
+                             final DnsResolver dnsResolver) {
+        super(Protocol.NETFLOW5, name, dispatcher, eventForwarder, identity, dnsResolver);
     }
 
     @Override
@@ -72,8 +74,12 @@ public class Netflow5UdpParser extends ParserBase implements UdpParser, Dispatch
     }
 
     @Override
-    public void start(final ScheduledExecutorService executorService) {}
+    public void start(final ScheduledExecutorService executorService) {
+        super.start();
+    }
 
     @Override
-    public void stop() {}
+    public void stop() {
+        super.stop();
+    }
 }

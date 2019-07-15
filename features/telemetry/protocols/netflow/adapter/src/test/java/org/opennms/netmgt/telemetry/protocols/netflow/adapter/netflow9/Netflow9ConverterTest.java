@@ -49,6 +49,7 @@ import org.bson.BsonDocument;
 import org.bson.RawBsonDocument;
 import org.junit.Test;
 import org.opennms.netmgt.flows.api.Flow;
+import org.opennms.netmgt.telemetry.common.utils.NullDnsResolver;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ParserBase;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow9.proto.Header;
@@ -110,7 +111,7 @@ public class Netflow9ConverterTest {
                 header = new Header(slice(buffer, Header.SIZE));
                 final Packet packet = new Packet(session, header, buffer);
                 packet.getRecords().forEach(rec -> {
-                    final ByteBuffer bf = ParserBase.serialize(Protocol.NETFLOW9, rec);
+                    final ByteBuffer bf = ParserBase.serialize(Protocol.NETFLOW9, rec, new NullDnsResolver());
                     final BsonDocument doc = new RawBsonDocument(bf.array());
                     flows.addAll(nf9Converter.convert(doc));
                 });

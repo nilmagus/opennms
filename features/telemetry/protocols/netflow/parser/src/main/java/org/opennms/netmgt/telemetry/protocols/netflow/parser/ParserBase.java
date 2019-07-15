@@ -37,18 +37,23 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.bson.BsonBinary;
 import org.bson.BsonBinaryWriter;
 import org.bson.BsonWriter;
 import org.bson.io.BasicOutputBuffer;
+import org.opennms.core.concurrent.LogPreservingThreadFactory;
 import org.opennms.core.ipc.sink.api.AsyncDispatcher;
 import org.opennms.distributed.core.api.Identity;
 import org.opennms.netmgt.events.api.EventForwarder;
 import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
-import org.opennms.netmgt.telemetry.common.utils.DnsUtils;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.RecordProvider;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.Value;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.BooleanValue;
@@ -73,6 +78,11 @@ import com.google.common.cache.LoadingCache;
 
 public class ParserBase {
     private static final Logger LOG = LoggerFactory.getLogger(ParserBase.class);
+
+    private static final int DEFAULT_NUM_THREADS = Runtime.getRuntime().availableProcessors() * 2;
+
+    private static final long DEFAULT_CLOCK_SKEW_EVENT_RATE_SECONDS = TimeUnit.HOURS.toSeconds(1);
+
     public static final String CLOCK_SKEW_EVENT_UEI = "uei.opennms.org/internal/telemetry/clockSkewDetected";
 
     private final Protocol protocol;
@@ -85,24 +95,59 @@ public class ParserBase {
 
     private final Identity identity;
 
+    private final DnsResolver dnsResolver;
+
+    private int threads = DEFAULT_NUM_THREADS;
+
     private long maxClockSkew = 0;
 
     private long clockSkewEventRate = 0;
 
     private LoadingCache<InetAddress, Optional<Instant>> eventCache;
 
+    private ExecutorService executor;
+
     public ParserBase(final Protocol protocol,
                       final String name,
                       final AsyncDispatcher<TelemetryMessage> dispatcher,
                       final EventForwarder eventForwarder,
-                      final Identity identity) {
+                      final Identity identity,
+                      final DnsResolver dnsResolver) {
         this.protocol = Objects.requireNonNull(protocol);
         this.name = Objects.requireNonNull(name);
         this.dispatcher = Objects.requireNonNull(dispatcher);
         this.eventForwarder = Objects.requireNonNull(eventForwarder);
         this.identity = Objects.requireNonNull(identity);
+        this.dnsResolver = Objects.requireNonNull(dnsResolver);
 
-        setClockSkewEventRate(3600);
+        // Call setters since these also perform additional handling
+        setClockSkewEventRate(DEFAULT_CLOCK_SKEW_EVENT_RATE_SECONDS);
+        setThreads(DEFAULT_NUM_THREADS);
+    }
+
+    public void start() {
+        executor = new ThreadPoolExecutor(
+                // corePoolSize must be > 0 since we use the RejectedExecutionHandler to block when the queue is full
+                1, threads,
+                60L, TimeUnit.SECONDS,
+                new SynchronousQueue<>(true),
+                new LogPreservingThreadFactory("Telemetryd-" + protocol + "-" + name, Integer.MAX_VALUE),
+                (r, executor) -> {
+                    // We enter this block when the queue is full and the caller is attempting to submit additional tasks
+                    try {
+                        // If we're not shutdown, then block until there's room in the queue
+                        if (!executor.isShutdown()) {
+                            executor.getQueue().put(r);
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RejectedExecutionException("Executor interrupted while waiting for capacity in the work queue.", e);
+                    }
+                });
+    }
+
+    public void stop() {
+        executor.shutdown();
     }
 
     public String getName() {
@@ -124,7 +169,7 @@ public class ParserBase {
     public void setClockSkewEventRate(final long clockSkewEventRate) {
         this.clockSkewEventRate = clockSkewEventRate;
 
-        this.eventCache =  CacheBuilder.newBuilder().expireAfterWrite(this.clockSkewEventRate, TimeUnit.SECONDS).build(new CacheLoader<InetAddress, Optional<Instant>>() {
+        this.eventCache = CacheBuilder.newBuilder().expireAfterWrite(this.clockSkewEventRate, TimeUnit.SECONDS).build(new CacheLoader<InetAddress, Optional<Instant>>() {
             @Override
             public Optional<Instant> load(InetAddress key) throws Exception {
                 return Optional.empty();
@@ -132,31 +177,62 @@ public class ParserBase {
         });
     }
 
-    protected CompletableFuture<?> transmit(final RecordProvider packet, final InetSocketAddress remoteAddress) throws Exception {
-        LOG.trace("Got packet: {}", packet);
-
-        // Return a future which completes when message is parsed and all records are transmitted
-        return CompletableFuture.allOf(packet.getRecords().map(record -> {
-            final ByteBuffer buffer = serialize(this.protocol, record);
-
-            // Build the message to dispatch
-            final TelemetryMessage msg = new TelemetryMessage(remoteAddress, buffer);
-
-            // Dispatch and retain a reference to the packet
-            // in the case that we are sharing the underlying byte array
-            return dispatcher.send(msg);
-        }).toArray(CompletableFuture[]::new));
+    public int getThreads() {
+        return threads;
     }
 
+    public void setThreads(int threads) {
+        if (threads < 1) {
+            throw new IllegalArgumentException("Threads must be >= 1");
+        }
+        this.threads = threads;
+    }
 
-    public static ByteBuffer serialize(final Protocol protocol, final Iterable<Value<?>> record) {
+    protected CompletableFuture<?> transmit(final RecordProvider packet, final InetSocketAddress remoteAddress) {
+        LOG.trace("Got packet: {}", packet);
+
+        // Perform the record serialization (and DNS lookups if enabled) using a separate thread in order to
+        // allow these to be performed in parallel
+        final CompletableFuture<CompletableFuture[]> futureOfFutures = CompletableFuture.supplyAsync(()-> {
+            return packet.getRecords().map(record -> {
+                final ByteBuffer buffer = serializeRecords(this.protocol, record);
+
+                // Build the message to dispatch
+                final TelemetryMessage msg = new TelemetryMessage(remoteAddress, buffer);
+
+                // Dispatch and retain a reference to the packet
+                // in the case that we are sharing the underlying byte array
+                return dispatcher.send(msg);
+            }).toArray(CompletableFuture[]::new);
+        }, executor);
+
+        // Return a future which is completed when the message is parsed/serialized and all records are transmitted
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        futureOfFutures.whenComplete((futures,ex) -> {
+            if (ex != null) {
+                future.completeExceptionally(ex);
+                return;
+            }
+            // The task was executed successfully, now let's wait for all of the child futures to complete
+            CompletableFuture.allOf(futures).whenComplete((any,exx) -> {
+                if (exx != null) {
+                    future.completeExceptionally(exx);
+                    return;
+                }
+                future.complete(any);
+            });
+        });
+        return future;
+    }
+
+    public static ByteBuffer serialize(final Protocol protocol, final Iterable<Value<?>> record, final DnsResolver dnsResolver) {
         // Build BSON document from flow
         final BasicOutputBuffer output = new BasicOutputBuffer();
         try (final BsonBinaryWriter writer = new BsonBinaryWriter(output)) {
             writer.writeStartDocument();
             writer.writeInt32("@version", protocol.version);
 
-            final FlowBuilderVisitor visitor = new FlowBuilderVisitor(writer);
+            final FlowBuilderVisitor visitor = new FlowBuilderVisitor(writer, dnsResolver);
             for (final Value<?> value : record) {
                 value.visit(visitor);
             }
@@ -165,6 +241,10 @@ public class ParserBase {
         }
 
         return output.getByteBuffers().get(0).asNIO();
+    }
+
+    public ByteBuffer serializeRecords(final Protocol protocol, final Iterable<Value<?>> record) {
+        return serialize(protocol, record, dnsResolver);
     }
 
     protected void detectClockSkew(final long packetTimestampMs, final InetAddress remoteAddress) {
@@ -198,9 +278,11 @@ public class ParserBase {
         // TODO: Really use ordinal for enums?
 
         private final BsonWriter writer;
+        private final DnsResolver dnsResolver;
 
-        public FlowBuilderVisitor(final BsonWriter writer) {
+        public FlowBuilderVisitor(final BsonWriter writer, final DnsResolver dnsResolver) {
             this.writer = writer;
+            this.dnsResolver = dnsResolver;
         }
 
         @Override
@@ -232,7 +314,7 @@ public class ParserBase {
         public void accept(final IPv4AddressValue value) {
             this.writer.writeStartDocument(value.getName());
             this.writer.writeString("address", value.getValue().getHostAddress());
-            DnsUtils.reverseLookup(value.getValue()).ifPresent((hostname) -> this.writer.writeString("hostname", hostname));
+            dnsResolver.reverseLookup(value.getValue()).ifPresent((hostname) -> this.writer.writeString("hostname", hostname));
             this.writer.writeEndDocument();
         }
 
@@ -240,7 +322,7 @@ public class ParserBase {
         public void accept(final IPv6AddressValue value) {
             this.writer.writeStartDocument(value.getName());
             this.writer.writeString("address", value.getValue().getHostAddress());
-            DnsUtils.reverseLookup(value.getValue()).ifPresent((hostname) -> this.writer.writeString("hostname", hostname));
+            dnsResolver.reverseLookup(value.getValue()).ifPresent((hostname) -> this.writer.writeString("hostname", hostname));
             this.writer.writeEndDocument();
         }
 
