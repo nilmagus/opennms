@@ -33,6 +33,8 @@ import java.util.Optional;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Array;
 
@@ -107,7 +109,7 @@ public class FlowSampleExpanded implements SampleData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("sequence_number", this.sequence_number);
         bsonWriter.writeName("source_id");
@@ -122,7 +124,7 @@ public class FlowSampleExpanded implements SampleData {
         bsonWriter.writeStartDocument("flows");
         for (final FlowRecord flowRecord : this.flow_records) {
             bsonWriter.writeName(flowRecord.dataFormat.toId());
-            flowRecord.writeBson(bsonWriter);
+            flowRecord.writeBson(bsonWriter, svcs);
         }
         bsonWriter.writeEndDocument();
         bsonWriter.writeEndDocument();

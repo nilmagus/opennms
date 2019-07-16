@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Array;
 
@@ -74,7 +75,7 @@ public class CountersSampleExpanded implements SampleData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("sequence_number", this.sequence_number);
 
@@ -84,7 +85,7 @@ public class CountersSampleExpanded implements SampleData {
         bsonWriter.writeStartDocument("counters");
         for (final CounterRecord counterRecord : this.counters) {
             bsonWriter.writeName(counterRecord.dataFormat.toId());
-            counterRecord.writeBson(bsonWriter);
+            counterRecord.writeBson(bsonWriter, svcs);
         }
         bsonWriter.writeEndDocument();
 

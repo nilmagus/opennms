@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.AsciiString;
 
@@ -88,7 +89,7 @@ public class Extended80211Rx implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("ssid", this.ssid.value);
 
@@ -103,7 +104,7 @@ public class Extended80211Rx implements FlowData {
         bsonWriter.writeInt64("rcpi", this.rcpi);
 
         bsonWriter.writeName("packet_duration");
-        this.packet_duration.writeBson(bsonWriter);
+        this.packet_duration.writeBson(bsonWriter, svcs);
         bsonWriter.writeEndDocument();
     }
 }

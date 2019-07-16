@@ -40,6 +40,7 @@ import org.bson.BsonBinaryWriter;
 import org.bson.io.BasicOutputBuffer;
 import org.opennms.core.ipc.sink.api.AsyncDispatcher;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.listeners.UdpParser;
 import org.opennms.netmgt.telemetry.api.receiver.Dispatchable;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.DatagramVersion;
@@ -47,7 +48,7 @@ import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.SampleDat
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SFlowUdpParser implements UdpParser, Dispatchable {
+public class SFlowUdpParser implements UdpParser, Dispatchable, DatagramServices {
 
     private static final Logger LOG = LoggerFactory.getLogger(SFlowUdpParser.class);
 
@@ -55,10 +56,14 @@ public class SFlowUdpParser implements UdpParser, Dispatchable {
 
     private final AsyncDispatcher<TelemetryMessage> dispatcher;
 
+    private final DnsResolver dnsResolver;
+
     public SFlowUdpParser(final String name,
-                          final AsyncDispatcher<TelemetryMessage> dispatcher) {
+                          final AsyncDispatcher<TelemetryMessage> dispatcher,
+                          final DnsResolver dnsResolver) {
         this.name = Objects.requireNonNull(name);
         this.dispatcher = Objects.requireNonNull(dispatcher);
+        this.dnsResolver = Objects.requireNonNull(dnsResolver);
     }
 
     @Override
@@ -82,7 +87,7 @@ public class SFlowUdpParser implements UdpParser, Dispatchable {
             bsonWriter.writeInt64(System.currentTimeMillis());
 
             bsonWriter.writeName("data");
-            packet.version.datagram.writeBson(bsonWriter);
+            packet.version.datagram.writeBson(bsonWriter, this);
 
             bsonWriter.writeEndDocument();
         }
@@ -104,5 +109,10 @@ public class SFlowUdpParser implements UdpParser, Dispatchable {
     @Override
     public void stop() {
 
+    }
+
+    @Override
+    public DnsResolver getDnsResolver() {
+        return dnsResolver;
     }
 }

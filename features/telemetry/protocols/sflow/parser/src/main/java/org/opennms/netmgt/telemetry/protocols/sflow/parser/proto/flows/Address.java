@@ -31,6 +31,7 @@ package org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows;
 import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 
 import com.google.common.base.MoreObjects;
@@ -80,17 +81,17 @@ public class Address {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
 
         switch (this.type) {
             case IP_V4:
                 bsonWriter.writeName("ipv4");
-                this.ipV4.writeBson(bsonWriter);
+                this.ipV4.writeBson(bsonWriter, svcs);
                 break;
             case IP_V6:
                 bsonWriter.writeName("ipv6");
-                this.ipV6.writeBson(bsonWriter);
+                this.ipV6.writeBson(bsonWriter, svcs);
                 break;
             default:
                 throw new IllegalStateException();

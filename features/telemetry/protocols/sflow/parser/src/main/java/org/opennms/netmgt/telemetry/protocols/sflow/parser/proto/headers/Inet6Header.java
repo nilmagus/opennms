@@ -34,7 +34,7 @@ import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.common.utils.DnsUtils;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 
 import com.google.common.base.Throwables;
@@ -114,7 +114,7 @@ public class Inet6Header {
         this.tcpFlags = tcpFlags;
     }
 
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DnsResolver dnsResolver) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt32("tos", this.tos);
         bsonWriter.writeInt32("length", this.totalLength);
@@ -122,12 +122,12 @@ public class Inet6Header {
 
         bsonWriter.writeStartDocument("src_ip");
         bsonWriter.writeString("address", this.srcAddress.getHostAddress());
-        DnsUtils.reverseLookup(this.srcAddress).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
+        dnsResolver.reverseLookup(this.srcAddress).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
         bsonWriter.writeEndDocument();
 
         bsonWriter.writeStartDocument("dst_ip");
         bsonWriter.writeString("address", this.dstAddress.getHostAddress());
-        DnsUtils.reverseLookup(this.dstAddress).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
+        dnsResolver.reverseLookup(this.dstAddress).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
         bsonWriter.writeEndDocument();
 
         if (this.srcPort != null) {

@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import org.bson.BsonBinary;
 import org.bson.BsonWriter;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Opaque;
 
@@ -69,14 +70,14 @@ public class ExtendedUser implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("src_charset");
-        this.src_charset.writeBson(bsonWriter);
+        this.src_charset.writeBson(bsonWriter, svcs);
         bsonWriter.writeName("src_user");
         bsonWriter.writeBinaryData(new BsonBinary(this.src_user.value));
         bsonWriter.writeName("dst_charset");
-        this.dst_charset.writeBson(bsonWriter);
+        this.dst_charset.writeBson(bsonWriter, svcs);
         bsonWriter.writeName("dst_user");
         bsonWriter.writeBinaryData(new BsonBinary(this.dst_user.value));
         bsonWriter.writeEndDocument();

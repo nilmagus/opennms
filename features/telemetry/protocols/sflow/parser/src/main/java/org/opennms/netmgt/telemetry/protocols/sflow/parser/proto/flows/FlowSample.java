@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Array;
 
@@ -118,22 +119,22 @@ public class FlowSample implements SampleData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("sequence_number", this.sequence_number);
         bsonWriter.writeName("source_id");
-        this.source_id.writeBson(bsonWriter);
+        this.source_id.writeBson(bsonWriter, svcs);
         bsonWriter.writeInt64("sampling_rate", this.sampling_rate);
         bsonWriter.writeInt64("sample_pool", this.sample_pool);
         bsonWriter.writeInt64("drops", this.drops);
         bsonWriter.writeName("input");
-        this.input.writeBson(bsonWriter);
+        this.input.writeBson(bsonWriter, svcs);
         bsonWriter.writeName("output");
-        this.output.writeBson(bsonWriter);
+        this.output.writeBson(bsonWriter, svcs);
         bsonWriter.writeStartDocument("flows");
         for (final FlowRecord flowRecord : this.flow_records) {
             bsonWriter.writeName(flowRecord.dataFormat.toId());
-            flowRecord.writeBson(bsonWriter);
+            flowRecord.writeBson(bsonWriter, svcs);
         }
         bsonWriter.writeEndDocument();
         bsonWriter.writeEndDocument();

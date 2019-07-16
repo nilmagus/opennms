@@ -31,6 +31,7 @@ package org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows;
 import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.AsciiString;
 
@@ -63,10 +64,10 @@ public class ExtendedUrl implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("direction");
-        this.direction.writeBson(bsonWriter);
+        this.direction.writeBson(bsonWriter, svcs);
         bsonWriter.writeString("url", this.url.value);
         bsonWriter.writeString("host", this.host.value);
         bsonWriter.writeEndDocument();

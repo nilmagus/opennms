@@ -34,6 +34,7 @@ import java.util.Optional;
 import org.bson.BsonBinary;
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Opaque;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.headers.EthernetHeader;
@@ -149,7 +150,7 @@ public class SampledHeader implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DnsResolver dnsResolver) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("protocol");
         this.protocol.writeBson(bsonWriter);
@@ -168,7 +169,7 @@ public class SampledHeader implements FlowData {
 
         if (this.inet6Header != null) {
             bsonWriter.writeName("ipv6");
-            this.inet6Header.writeBson(bsonWriter);
+            this.inet6Header.writeBson(bsonWriter, dnsResolver);
         }
 
         if (this.rawHeader != null) {

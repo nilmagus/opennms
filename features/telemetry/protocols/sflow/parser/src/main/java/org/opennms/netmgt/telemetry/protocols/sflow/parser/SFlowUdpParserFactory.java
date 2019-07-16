@@ -35,6 +35,7 @@ import org.opennms.netmgt.telemetry.api.registry.TelemetryRegistry;
 import org.opennms.netmgt.telemetry.api.receiver.Parser;
 import org.opennms.netmgt.telemetry.api.receiver.ParserFactory;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.config.api.ParserDefinition;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -42,9 +43,11 @@ import org.springframework.beans.PropertyAccessorFactory;
 public class SFlowUdpParserFactory implements ParserFactory {
 
     private final TelemetryRegistry telemetryRegistry;
+    private final DnsResolver dnsResolver;
 
-    public SFlowUdpParserFactory(TelemetryRegistry telemetryRegistry) {
+    public SFlowUdpParserFactory(TelemetryRegistry telemetryRegistry, DnsResolver dnsResolver) {
         this.telemetryRegistry = Objects.requireNonNull(telemetryRegistry);
+        this.dnsResolver = Objects.requireNonNull(dnsResolver);
     }
 
     @Override
@@ -55,7 +58,7 @@ public class SFlowUdpParserFactory implements ParserFactory {
     @Override
     public Parser createBean(ParserDefinition beanDefinition) {
         final AsyncDispatcher<TelemetryMessage> dispatcher = telemetryRegistry.getDispatcher(beanDefinition.getQueueName());
-        final SFlowUdpParser parser = new SFlowUdpParser(beanDefinition.getName(), dispatcher);
+        final SFlowUdpParser parser = new SFlowUdpParser(beanDefinition.getName(), dispatcher, dnsResolver);
         final BeanWrapper wrapper = PropertyAccessorFactory.forBeanPropertyAccess(parser);
         wrapper.setPropertyValues(beanDefinition.getParameterMap());
         return parser;

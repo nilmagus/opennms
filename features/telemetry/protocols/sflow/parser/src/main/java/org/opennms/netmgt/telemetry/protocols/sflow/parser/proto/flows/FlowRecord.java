@@ -32,6 +32,8 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 import org.bson.BsonWriter;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Opaque;
 
@@ -97,9 +99,9 @@ public class FlowRecord extends Record<FlowData> {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs {
         if (data.value != null) {
-            this.data.value.writeBson(bsonWriter);
+            this.data.value.writeBson(bsonWriter, svcs);
         } else {
             bsonWriter.writeNull();
         }

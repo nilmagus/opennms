@@ -1,8 +1,8 @@
 /*******************************************************************************
  * This file is part of OpenNMS(R).
  *
- * Copyright (C) 2018 The OpenNMS Group, Inc.
- * OpenNMS(R) is Copyright (C) 1999-2018 The OpenNMS Group, Inc.
+ * Copyright (C) 2019 The OpenNMS Group, Inc.
+ * OpenNMS(R) is Copyright (C) 1999-2019 The OpenNMS Group, Inc.
  *
  * OpenNMS(R) is a registered trademark of The OpenNMS Group, Inc.
  *
@@ -26,36 +26,15 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows;
+package org.opennms.netmgt.telemetry.protocols.sflow.parser;
 
-import java.nio.ByteBuffer;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 
-import org.bson.BsonWriter;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
+/**
+ * Access to services required to augment the datagrams.
+ */
+public interface DatagramServices {
 
-import com.google.common.base.MoreObjects;
+    DnsResolver getDnsResolver();
 
-// struct extended_L2_tunnel_ingress {
-//      sampled_ethernet header;
-// };
-
-public class ExtendedL2TunnelIngress implements FlowData {
-    public final SampledEthernet header;
-
-    public ExtendedL2TunnelIngress(final ByteBuffer buffer) throws InvalidPacketException {
-        this.header = new SampledEthernet(buffer);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("header", this.header)
-                .toString();
-    }
-
-    @Override
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
-        this.header.writeBson(bsonWriter);
-    }
 }

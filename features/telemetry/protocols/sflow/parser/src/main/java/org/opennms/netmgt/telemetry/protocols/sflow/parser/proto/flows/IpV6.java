@@ -34,8 +34,7 @@ import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.common.utils.DnsUtils;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
@@ -61,10 +60,10 @@ public class IpV6 {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("address", this.ip_v6.getHostAddress());
-        DnsUtils.reverseLookup(this.ip_v6).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
+        svcs.getDnsResolver().reverseLookup(this.ip_v6).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
         bsonWriter.writeEndDocument();
     }
 }

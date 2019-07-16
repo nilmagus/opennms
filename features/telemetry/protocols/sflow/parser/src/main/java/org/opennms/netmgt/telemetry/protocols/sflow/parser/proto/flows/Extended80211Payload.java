@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import org.bson.BsonBinary;
 import org.bson.BsonWriter;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Opaque;
 
@@ -61,10 +62,10 @@ public class Extended80211Payload implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("ciphersuite");
-        this.ciphersuite.writeBson(bsonWriter);
+        this.ciphersuite.writeBson(bsonWriter, svcs);
         bsonWriter.writeBinaryData("data", new BsonBinary(this.data.value));
         bsonWriter.writeEndDocument();
     }

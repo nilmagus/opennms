@@ -33,6 +33,8 @@ import java.util.Optional;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.AugmentationService;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Array;
 
@@ -92,7 +94,7 @@ public class SampleDatagramV5 {
         this.samples = samples;
     }
 
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("agent_address");
         this.agent_address.writeBson(bsonWriter);
@@ -101,7 +103,7 @@ public class SampleDatagramV5 {
         bsonWriter.writeInt64("uptime", this.uptime);
         bsonWriter.writeStartArray("samples");
         for (final SampleRecord sampleRecord : this.samples) {
-            sampleRecord.writeBson(bsonWriter);
+            sampleRecord.writeBson(bsonWriter, svcs);
         }
         bsonWriter.writeEndArray();
         bsonWriter.writeEndDocument();
