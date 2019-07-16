@@ -37,9 +37,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.opennms.core.ipc.sink.api.AsyncDispatcher;
 import org.opennms.distributed.core.api.Identity;
+import org.opennms.netmgt.dnsresolver.api.DnsResolver;
 import org.opennms.netmgt.events.api.EventForwarder;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
-import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Log;
 
@@ -90,8 +90,8 @@ public class ClockSkewTest {
     private DnsResolver dnsResolver = new DnsResolver() {
 
         @Override
-        public Optional<String> reverseLookup(InetAddress inetAddress) {
-            return Optional.empty();
+        public CompletableFuture<Optional<String>> reverseLookup(InetAddress inetAddress) {
+            return CompletableFuture.completedFuture(Optional.empty());
         }
     };
 

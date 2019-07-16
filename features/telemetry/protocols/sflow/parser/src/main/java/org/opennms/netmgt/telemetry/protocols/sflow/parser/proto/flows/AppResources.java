@@ -32,7 +32,7 @@ import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 
 import com.google.common.base.MoreObjects;
@@ -87,7 +87,7 @@ public class AppResources implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("user_time", this.user_time);
         bsonWriter.writeInt64("system_time", this.system_time);

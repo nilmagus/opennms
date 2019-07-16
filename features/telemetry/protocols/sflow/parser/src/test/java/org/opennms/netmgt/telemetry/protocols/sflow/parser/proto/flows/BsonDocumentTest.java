@@ -32,9 +32,11 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.bson.BsonDocument;
 import org.bson.BsonDocumentWriter;
@@ -45,7 +47,7 @@ import org.opennms.netmgt.flows.api.Flow;
 import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.common.utils.NullDnsResolver;
 import org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlow;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Array;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Opaque;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.headers.EthernetHeader;
@@ -54,7 +56,7 @@ import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.headers.Inet6He
 
 import com.google.common.primitives.UnsignedInteger;
 
-public class BsonDocumentTest implements DatagramServices {
+public class BsonDocumentTest implements SampleDatagramEnrichment {
     private static final long CURRENT_TIME_MILLIS = System.currentTimeMillis();
     private static final IpV4 SRC_IPV4 = new IpV4(ByteBuffer.wrap(new byte[]{(byte) 192, (byte) 168, (byte) 1, (byte) 1}));
     private static final String SRC_IPV4_STR = "192.168.1.1";
@@ -413,7 +415,7 @@ public class BsonDocumentTest implements DatagramServices {
     }
 
     @Override
-    public DnsResolver getDnsResolver() {
-        return new NullDnsResolver();
+    public Optional<String> getHostnameFor(InetAddress srcAddress) {
+        return Optional.empty();
     }
 }

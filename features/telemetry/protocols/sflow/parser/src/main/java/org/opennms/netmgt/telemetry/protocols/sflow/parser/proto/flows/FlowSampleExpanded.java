@@ -33,9 +33,9 @@ import java.util.Optional;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramVisitor;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Array;
 
 import com.google.common.base.MoreObjects;
@@ -109,7 +109,7 @@ public class FlowSampleExpanded implements SampleData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("sequence_number", this.sequence_number);
         bsonWriter.writeName("source_id");
@@ -128,5 +128,13 @@ public class FlowSampleExpanded implements SampleData {
         }
         bsonWriter.writeEndDocument();
         bsonWriter.writeEndDocument();
+    }
+
+    @Override
+    public void visit(final SampleDatagramVisitor visitor) {
+        visitor.accept(this);
+        for (final FlowRecord flowRecord : this.flow_records) {
+            flowRecord.visit(visitor);
+        }
     }
 }

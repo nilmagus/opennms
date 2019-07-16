@@ -32,8 +32,9 @@ import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramVisitor;
 
 import com.google.common.base.MoreObjects;
 
@@ -72,12 +73,18 @@ public class ExtendedRouter implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("nexthop");
         this.nexthop.writeBson(bsonWriter, svcs);
         bsonWriter.writeInt64("src_mask_len", this.src_mask_len);
         bsonWriter.writeInt64("dst_mask_len", this.dst_mask_len);
         bsonWriter.writeEndDocument();
+    }
+
+    @Override
+    public void visit(final SampleDatagramVisitor visitor) {
+        visitor.accept(this);
+        nexthop.visit(visitor);
     }
 }

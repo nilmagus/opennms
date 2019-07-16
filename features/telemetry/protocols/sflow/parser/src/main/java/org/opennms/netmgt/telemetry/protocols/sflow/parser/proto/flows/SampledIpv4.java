@@ -32,8 +32,9 @@ import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramVisitor;
 
 import com.google.common.base.MoreObjects;
 
@@ -97,7 +98,7 @@ public class SampledIpv4 implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt32("length", (int) this.length);
         bsonWriter.writeInt32("protocol", (int) this.protocol);
@@ -113,5 +114,10 @@ public class SampledIpv4 implements FlowData {
         bsonWriter.writeInt32("tcp_flags", (int) this.tcp_flags);
         bsonWriter.writeInt32("tos", (int) this.tos);
         bsonWriter.writeEndDocument();
+    }
+
+    @Override
+    public void visit(SampleDatagramVisitor visitor) {
+        visitor.accept(this);
     }
 }

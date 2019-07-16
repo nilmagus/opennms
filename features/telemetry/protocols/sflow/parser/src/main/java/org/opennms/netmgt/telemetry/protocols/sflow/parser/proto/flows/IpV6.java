@@ -34,7 +34,8 @@ import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramVisitor;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
@@ -53,6 +54,10 @@ public class IpV6 {
         }
     }
 
+    public Inet6Address getAddress() {
+        return ip_v6;
+    }
+
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
@@ -60,10 +65,14 @@ public class IpV6 {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("address", this.ip_v6.getHostAddress());
-        svcs.getDnsResolver().reverseLookup(this.ip_v6).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
+        svcs.getHostnameFor(this.ip_v6).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
         bsonWriter.writeEndDocument();
+    }
+
+    public void visit(SampleDatagramVisitor visitor) {
+        visitor.accept(this);
     }
 }

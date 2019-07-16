@@ -26,13 +26,40 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.netmgt.telemetry.common.utils;
+package org.opennms.netmgt.dnsresolver.netty;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 
 import java.net.InetAddress;
-import java.util.Optional;
+import java.net.UnknownHostException;
+import java.util.concurrent.ExecutionException;
 
-public interface DnsResolver {
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.opennms.core.utils.InetAddressUtils;
 
-    Optional<String> reverseLookup(final InetAddress inetAddress);
+public class NettyDnsResolverTest {
 
+    private NettyDnsResolver dnsResolver;
+
+    @Before
+    public void setUp() {
+        dnsResolver = new NettyDnsResolver();
+        dnsResolver.init();
+    }
+
+    @After
+    public void destroy() {
+        dnsResolver.destroy();
+    }
+
+    @Test
+    public void canDoReverseLookups() throws UnknownHostException, ExecutionException, InterruptedException {
+        assertThat(dnsResolver.reverseLookup(InetAddress.getByName("1.1.1.1")).get().get(), equalTo("one.one.one.one"));
+        assertThat(dnsResolver.reverseLookup(InetAddress.getByName("173.242.186.51")).get().get(), equalTo("rnd.opennms.ca"));
+        // TESTNET
+        assertThat(dnsResolver.reverseLookup(InetAddressUtils.addr("fe80::")).get().isPresent(), equalTo(false));
+    }
 }

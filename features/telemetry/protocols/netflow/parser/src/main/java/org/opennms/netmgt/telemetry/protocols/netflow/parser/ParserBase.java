@@ -50,10 +50,10 @@ import org.bson.io.BasicOutputBuffer;
 import org.opennms.core.concurrent.LogPreservingThreadFactory;
 import org.opennms.core.ipc.sink.api.AsyncDispatcher;
 import org.opennms.distributed.core.api.Identity;
+import org.opennms.netmgt.dnsresolver.api.DnsResolver;
 import org.opennms.netmgt.events.api.EventForwarder;
 import org.opennms.netmgt.model.events.EventBuilder;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
-import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.RecordProvider;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.Value;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.BooleanValue;
@@ -72,6 +72,7 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.UnsignedV
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -191,48 +192,77 @@ public class ParserBase {
     protected CompletableFuture<?> transmit(final RecordProvider packet, final InetSocketAddress remoteAddress) {
         LOG.trace("Got packet: {}", packet);
 
-        // Perform the record serialization (and DNS lookups if enabled) using a separate thread in order to
-        // allow these to be performed in parallel
+        // Perform the record enrichment and serialization in a thread pool allowing these to be parallelized
         final CompletableFuture<CompletableFuture[]> futureOfFutures = CompletableFuture.supplyAsync(()-> {
             return packet.getRecords().map(record -> {
-                final ByteBuffer buffer = serializeRecords(this.protocol, record);
+                final CompletableFuture<TelemetryMessage> future = new CompletableFuture<>();
+                // Trigger record enrichment (performing DNS reverse lookups for example)
+                final RecordEnricher recordEnricher = new RecordEnricher(dnsResolver);
+                recordEnricher.enrich(record).whenComplete((enrichment, ex) -> {
+                    if (ex != null) {
+                        // Enrichment failed
+                        future.completeExceptionally(ex);
+                        return;
+                    }
+                    // Enrichment was successful, let's serialize
+                    final ByteBuffer buffer = serializeRecords(this.protocol, record, enrichment);
 
-                // Build the message to dispatch
-                final TelemetryMessage msg = new TelemetryMessage(remoteAddress, buffer);
+                    // Build the message to dispatch
+                    final TelemetryMessage msg = new TelemetryMessage(remoteAddress, buffer);
 
-                // Dispatch and retain a reference to the packet
-                // in the case that we are sharing the underlying byte array
-                return dispatcher.send(msg);
+                    // Dispatch
+                    dispatcher.send(msg).whenComplete((b,exx) -> {
+                        if (exx != null) {
+                            future.completeExceptionally(exx);
+                            return;
+                        }
+                        future.complete(b);
+                    });
+                });
+                return future;
             }).toArray(CompletableFuture[]::new);
         }, executor);
 
-        // Return a future which is completed when the message is parsed/serialized and all records are transmitted
+        // Return a future which is completed when all records are finished dispatching (i.e. written to Kafka)
         final CompletableFuture<Void> future = new CompletableFuture<>();
         futureOfFutures.whenComplete((futures,ex) -> {
             if (ex != null) {
+                // There was an error preparing the records for dispatch
                 future.completeExceptionally(ex);
                 return;
             }
-            // The task was executed successfully, now let's wait for all of the child futures to complete
+            // Dispatch was triggered for all the records, now wait for the dispatching to complete
             CompletableFuture.allOf(futures).whenComplete((any,exx) -> {
                 if (exx != null) {
+                    // One or more of the records were not successfully dispatched
                     future.completeExceptionally(exx);
                     return;
                 }
+                // All of the records have been successfully dispatched
                 future.complete(any);
             });
         });
         return future;
     }
 
-    public static ByteBuffer serialize(final Protocol protocol, final Iterable<Value<?>> record, final DnsResolver dnsResolver) {
+    @VisibleForTesting
+    public static ByteBuffer serialize(final Protocol protocol, final Iterable<Value<?>> record) {
+        return serialize(protocol, record, new RecordEnrichment() {
+            @Override
+            public Optional<String> getHostnameFor(InetAddress srcAddress) {
+                return Optional.empty();
+            }
+        });
+    }
+
+    private static ByteBuffer serialize(final Protocol protocol, final Iterable<Value<?>> record, final RecordEnrichment enrichment) {
         // Build BSON document from flow
         final BasicOutputBuffer output = new BasicOutputBuffer();
         try (final BsonBinaryWriter writer = new BsonBinaryWriter(output)) {
             writer.writeStartDocument();
             writer.writeInt32("@version", protocol.version);
 
-            final FlowBuilderVisitor visitor = new FlowBuilderVisitor(writer, dnsResolver);
+            final FlowBuilderVisitor visitor = new FlowBuilderVisitor(writer, enrichment);
             for (final Value<?> value : record) {
                 value.visit(visitor);
             }
@@ -243,8 +273,8 @@ public class ParserBase {
         return output.getByteBuffers().get(0).asNIO();
     }
 
-    public ByteBuffer serializeRecords(final Protocol protocol, final Iterable<Value<?>> record) {
-        return serialize(protocol, record, dnsResolver);
+    private ByteBuffer serializeRecords(final Protocol protocol, final Iterable<Value<?>> record, final RecordEnrichment enrichment) {
+        return serialize(protocol, record, enrichment);
     }
 
     protected void detectClockSkew(final long packetTimestampMs, final InetAddress remoteAddress) {
@@ -278,11 +308,11 @@ public class ParserBase {
         // TODO: Really use ordinal for enums?
 
         private final BsonWriter writer;
-        private final DnsResolver dnsResolver;
+        private final RecordEnrichment enrichment;
 
-        public FlowBuilderVisitor(final BsonWriter writer, final DnsResolver dnsResolver) {
+        public FlowBuilderVisitor(final BsonWriter writer, final RecordEnrichment enrichment) {
             this.writer = writer;
-            this.dnsResolver = dnsResolver;
+            this.enrichment = enrichment;
         }
 
         @Override
@@ -314,7 +344,7 @@ public class ParserBase {
         public void accept(final IPv4AddressValue value) {
             this.writer.writeStartDocument(value.getName());
             this.writer.writeString("address", value.getValue().getHostAddress());
-            dnsResolver.reverseLookup(value.getValue()).ifPresent((hostname) -> this.writer.writeString("hostname", hostname));
+            enrichment.getHostnameFor(value.getValue()).ifPresent((hostname) -> this.writer.writeString("hostname", hostname));
             this.writer.writeEndDocument();
         }
 
@@ -322,7 +352,7 @@ public class ParserBase {
         public void accept(final IPv6AddressValue value) {
             this.writer.writeStartDocument(value.getName());
             this.writer.writeString("address", value.getValue().getHostAddress());
-            dnsResolver.reverseLookup(value.getValue()).ifPresent((hostname) -> this.writer.writeString("hostname", hostname));
+            enrichment.getHostnameFor(value.getValue()).ifPresent((hostname) -> this.writer.writeString("hostname", hostname));
             this.writer.writeEndDocument();
         }
 

@@ -34,8 +34,9 @@ import java.util.Optional;
 import org.bson.BsonBinary;
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramVisitor;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Opaque;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.headers.EthernetHeader;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.headers.Inet4Header;
@@ -150,7 +151,7 @@ public class SampledHeader implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("protocol");
         this.protocol.writeBson(bsonWriter);
@@ -177,5 +178,16 @@ public class SampledHeader implements FlowData {
         }
 
         bsonWriter.writeEndDocument();
+    }
+
+    @Override
+    public void visit(SampleDatagramVisitor visitor) {
+        visitor.accept(this);
+        if (this.inet4Header != null) {
+            inet4Header.visit(visitor);
+        }
+        if (this.inet6Header != null) {
+            inet6Header.visit(visitor);
+        }
     }
 }

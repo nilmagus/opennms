@@ -46,9 +46,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 import org.opennms.core.ipc.sink.api.AsyncDispatcher;
 import org.opennms.distributed.core.api.Identity;
+import org.opennms.netmgt.dnsresolver.api.DnsResolver;
 import org.opennms.netmgt.events.api.EventForwarder;
 import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
-import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
 import org.opennms.netmgt.telemetry.listeners.UdpListener;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.Netflow5UdpParser;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Header;
@@ -79,9 +79,9 @@ public class ListenerParserThreadingIT implements AsyncDispatcher<TelemetryMessa
         CompletableFuture<Integer> future = threadLocker.waitForThreads(NUM_THREADS);
         DnsResolver dnsResolver = new DnsResolver() {
             @Override
-            public Optional<String> reverseLookup(InetAddress inetAddress) {
+            public CompletableFuture<Optional<String>> reverseLookup(InetAddress inetAddress) {
                 threadLocker.park();
-                return Optional.empty();
+                return CompletableFuture.completedFuture(Optional.empty());
             }
         };
 

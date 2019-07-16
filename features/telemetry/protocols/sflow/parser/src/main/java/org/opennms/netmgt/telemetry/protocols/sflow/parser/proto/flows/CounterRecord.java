@@ -32,8 +32,9 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 
 import org.bson.BsonWriter;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramVisitor;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Opaque;
 
 import com.google.common.collect.ImmutableMap;
@@ -91,11 +92,16 @@ public class CounterRecord extends Record<CounterData> {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
         if (data.value != null) {
             this.data.value.writeBson(bsonWriter, svcs);
         } else {
             bsonWriter.writeNull();
         }
+    }
+
+    @Override
+    public void visit(SampleDatagramVisitor visitor) {
+        visitor.accept(this);
     }
 }

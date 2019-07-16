@@ -29,8 +29,8 @@
 package org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows;
 
 import org.bson.BsonWriter;
-import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 
 public interface CounterData {
-    void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs);
+    void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs);
 }

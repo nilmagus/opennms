@@ -40,17 +40,19 @@ import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.SampleRec
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class BlackboxTest implements DatagramServices {
+public class BlackboxTest implements SampleDatagramEnrichment {
     private final static Path FOLDER = Paths.get("src/test/resources/flows");
     private final static Record.DataFormat DATA_FORMAT0_1 = Record.DataFormat.from(0, 1);
     private final static Record.DataFormat DATA_FORMAT0_3 = Record.DataFormat.from(0, 3);
@@ -99,7 +101,7 @@ public class BlackboxTest implements DatagramServices {
     }
 
     @Override
-    public DnsResolver getDnsResolver() {
-        return new NullDnsResolver();
+    public Optional<String> getHostnameFor(InetAddress srcAddress) {
+        return Optional.empty();
     }
 }

@@ -28,13 +28,16 @@
 
 package org.opennms.netmgt.telemetry.protocols.sflow.parser;
 
-import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
+import java.net.InetAddress;
+import java.util.Optional;
 
 /**
- * Access to services required to augment the datagrams.
+ * Methods used by the (BSON) serialization process to access augmented facts.
+ *
+ * These facts are expected to be pre-populated by visiting the sample datagram tree and should be non-blocking.
  */
-public interface DatagramServices {
+public interface SampleDatagramEnrichment {
 
-    DnsResolver getDnsResolver();
+    Optional<String> getHostnameFor(InetAddress srcAddress);
 
 }

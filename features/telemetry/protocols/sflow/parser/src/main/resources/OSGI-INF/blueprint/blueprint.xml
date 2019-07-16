@@ -12,10 +12,7 @@
 ">
 
     <reference id="telemetryRegistry" interface="org.opennms.netmgt.telemetry.api.registry.TelemetryRegistry" availability="mandatory" />
-
-    <bean id="dnsResolver" class="org.opennms.netmgt.telemetry.common.utils.DefaultDnsResolver">
-        <argument ref="blueprintBundleContext"/>
-    </bean>
+    <reference id="dnsResolver" interface="org.opennms.netmgt.dnsresolver.api.DnsResolver" availability="mandatory" />
 
     <!-- SFlow Parser Factory -->
     <bean id="sflowParserFactory" class="org.opennms.netmgt.telemetry.protocols.sflow.parser.SFlowUdpParserFactory">

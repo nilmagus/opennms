@@ -11,10 +11,7 @@
     <reference id="telemetryRegistry" interface="org.opennms.netmgt.telemetry.api.registry.TelemetryRegistry" availability="mandatory" />
     <reference id="eventForwarder" interface="org.opennms.netmgt.events.api.EventForwarder" availability="mandatory"/>
     <reference id="identity" interface="org.opennms.distributed.core.api.Identity" />
-
-    <bean id="dnsResolver" class="org.opennms.netmgt.telemetry.common.utils.DefaultDnsResolver">
-        <argument ref="blueprintBundleContext"/>
-    </bean>
+    <reference id="dnsResolver" interface="org.opennms.netmgt.dnsresolver.api.DnsResolver" availability="mandatory" />
 
     <!-- Netflow 5 UDP Parser Factory -->
     <bean id="netflow5UdpParserFactory" class="org.opennms.netmgt.telemetry.protocols.netflow.parser.factory.Netflow5UdpParserFactory">

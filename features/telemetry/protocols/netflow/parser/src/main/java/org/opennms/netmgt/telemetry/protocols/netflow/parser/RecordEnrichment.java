@@ -26,19 +26,18 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.netmgt.telemetry.common.utils;
+package org.opennms.netmgt.telemetry.protocols.netflow.parser;
 
 import java.net.InetAddress;
 import java.util.Optional;
 
 /**
- * A {@link DnsResolver} that never resolves anything.
+ * Methods used by the (BSON) serialization process to access augmented facts.
  *
- * @author jwhite
+ * These facts are expected to be pre-populated by visiting the record and should be non-blocking.
  */
-public class NullDnsResolver implements DnsResolver {
-    @Override
-    public Optional<String> reverseLookup(InetAddress inetAddress) {
-        return Optional.empty();
-    }
+public interface RecordEnrichment {
+
+    Optional<String> getHostnameFor(InetAddress srcAddress);
+
 }

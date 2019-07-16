@@ -26,15 +26,17 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.netmgt.telemetry.common.utils;
+package org.opennms.netmgt.dnsresolver.dnsjava;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import org.opennms.core.utils.InetAddressUtils;
+import org.opennms.netmgt.dnsresolver.api.DnsResolver;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +50,8 @@ import org.xbill.DNS.Type;
 
 import com.google.common.base.Strings;
 
-public class DefaultDnsResolver implements DnsResolver {
-    private static final Logger LOG = LoggerFactory.getLogger(DefaultDnsResolver.class);
+public class DnsJavaResolver implements DnsResolver {
+    private static final Logger LOG = LoggerFactory.getLogger(DnsJavaResolver.class);
     static final String DNS_PRIMARY_SERVER = "org.opennms.features.telemetry.dns.primaryServer";
     static final String DNS_SECONDARY_SERVER = "org.opennms.features.telemetry.dns.secondaryServer";
     static final String DNS_ENABLE = "org.opennms.features.telemetry.dns.enable";
@@ -67,7 +69,7 @@ public class DefaultDnsResolver implements DnsResolver {
 
     private final BundleContext bundleContext;
 
-    public DefaultDnsResolver(BundleContext bundleContext) {
+    public DnsJavaResolver(BundleContext bundleContext) {
         this.bundleContext = Objects.requireNonNull(bundleContext);
 
         try {
@@ -134,14 +136,14 @@ public class DefaultDnsResolver implements DnsResolver {
         return resolver;
     }
 
-    public Optional<String> reverseLookup(final String inetAddress) {
+    public CompletableFuture<Optional<String>> reverseLookup(final String inetAddress) {
         return reverseLookup(InetAddressUtils.addr(inetAddress));
     }
 
     @Override
-    public Optional<String> reverseLookup(final InetAddress inetAddress) {
+    public CompletableFuture<Optional<String>> reverseLookup(final InetAddress inetAddress) {
         if (!enable) {
-            return Optional.empty();
+            return CompletableFuture.completedFuture(Optional.empty());
         }
 
         final Lookup lookup = new Lookup(ReverseMap.fromAddress(inetAddress), Type.PTR);
@@ -150,7 +152,7 @@ public class DefaultDnsResolver implements DnsResolver {
 
         final Record records[] = lookup.run();
         if (lookup.getResult() == Lookup.SUCCESSFUL) {
-            return Arrays.stream(records)
+            final Optional<String> result = Arrays.stream(records)
                     .filter(PTRRecord.class::isInstance)
                     .reduce((first, other) -> {
                         LOG.warn("Reverse lookup of hostname got multiple results: {}", inetAddress);
@@ -159,10 +161,10 @@ public class DefaultDnsResolver implements DnsResolver {
                     .map(rr -> ((PTRRecord) rr).getTarget().toString())
                     // Strip of the trailing dot
                     .map(hostname -> hostname.substring(0, hostname.length() - 1));
+            return CompletableFuture.completedFuture(result);
         } else {
             LOG.warn("Reverse lookup of hostname failed: {}", inetAddress);
+            return CompletableFuture.completedFuture(Optional.empty());
         }
-
-        return Optional.empty();
     }
 }
