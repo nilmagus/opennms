@@ -68,6 +68,6 @@ public enum DatagramVersion {
     }
 
     public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
-        bsonWriter.writeInt32(this.value, svcs);
+        bsonWriter.writeInt32(this.value);
     }
 }

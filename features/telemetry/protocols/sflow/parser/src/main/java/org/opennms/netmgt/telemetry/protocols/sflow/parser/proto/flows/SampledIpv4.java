@@ -32,7 +32,7 @@ import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
-import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 
 import com.google.common.base.MoreObjects;
@@ -97,16 +97,16 @@ public class SampledIpv4 implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final DnsResolver dnsResolver) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt32("length", (int) this.length);
         bsonWriter.writeInt32("protocol", (int) this.protocol);
 
         bsonWriter.writeName("src_ip");
-        this.src_ip.writeBson(bsonWriter, dnsResolver);
+        this.src_ip.writeBson(bsonWriter, svcs);
 
         bsonWriter.writeName("dst_ip");
-        this.dst_ip.writeBson(bsonWriter, dnsResolver);
+        this.dst_ip.writeBson(bsonWriter, svcs);
 
         bsonWriter.writeInt32("src_port", (int) this.src_port);
         bsonWriter.writeInt32("dst_port", (int) this.dst_port);

@@ -57,7 +57,7 @@ public class Attributes {
     public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartArray();
         for (final Utf8string utf8string : this.attributes) {
-            utf8string.writeBson(bsonWriter);
+            utf8string.writeBson(bsonWriter, svcs);
         }
         bsonWriter.writeEndArray();
     }

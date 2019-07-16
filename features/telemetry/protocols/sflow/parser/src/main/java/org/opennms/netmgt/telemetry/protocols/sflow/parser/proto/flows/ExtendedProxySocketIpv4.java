@@ -56,6 +56,6 @@ public class ExtendedProxySocketIpv4 implements FlowData {
 
     @Override
     public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
-        this.socket.writeBson(bsonWriter);
+        this.socket.writeBson(bsonWriter, svcs);
     }
 }

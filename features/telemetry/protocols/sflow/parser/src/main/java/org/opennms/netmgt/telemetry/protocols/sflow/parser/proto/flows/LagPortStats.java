@@ -111,9 +111,9 @@ public class LagPortStats {
     public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("dot3adAggPortActorSystemID");
-        this.dot3adAggPortActorSystemID.writeBson(bsonWriter);
+        this.dot3adAggPortActorSystemID.writeBson(bsonWriter, svcs);
         bsonWriter.writeName("dot3adAggPortPartnerOperSystemID");
-        this.dot3adAggPortPartnerOperSystemID.writeBson(bsonWriter);
+        this.dot3adAggPortPartnerOperSystemID.writeBson(bsonWriter, svcs);
         bsonWriter.writeInt64("dot3adAggPortAttachedAggID", this.dot3adAggPortAttachedAggID);
         bsonWriter.writeBinaryData("dot3adAggPortState", new BsonBinary(this.dot3adAggPortState.value));
         bsonWriter.writeInt64("dot3adAggPortStatsLACPDUsRx", this.dot3adAggPortStatsLACPDUsRx);

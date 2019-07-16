@@ -80,7 +80,7 @@ public class CountersSample implements SampleData {
         bsonWriter.writeInt64("sequence_number", this.sequence_number);
 
         bsonWriter.writeName("source_id");
-        this.source_id.writeBson(bsonWriter);
+        this.source_id.writeBson(bsonWriter, svcs);
 
         bsonWriter.writeStartDocument("counters");
         for (final CounterRecord counterRecord : this.counters) {

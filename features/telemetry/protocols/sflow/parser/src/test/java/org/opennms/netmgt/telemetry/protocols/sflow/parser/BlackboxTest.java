@@ -32,6 +32,8 @@ import org.bson.json.JsonWriter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
+import org.opennms.netmgt.telemetry.common.utils.NullDnsResolver;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.Record;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.SampleDatagram;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.SampleRecord;
@@ -48,7 +50,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
-public class BlackboxTest {
+public class BlackboxTest implements DatagramServices {
     private final static Path FOLDER = Paths.get("src/test/resources/flows");
     private final static Record.DataFormat DATA_FORMAT0_1 = Record.DataFormat.from(0, 1);
     private final static Record.DataFormat DATA_FORMAT0_3 = Record.DataFormat.from(0, 3);
@@ -68,7 +70,7 @@ public class BlackboxTest {
         final StringWriter stringWriter = new StringWriter();
         final JsonWriter jsonWriter = new JsonWriter(stringWriter);
         int total = 0;
-        packet.writeBson(jsonWriter);
+        packet.writeBson(jsonWriter, this);
         System.out.println(stringWriter.toString());
 
         for (SampleRecord sampleRecord : packet.version.datagram.samples.values) {
@@ -94,5 +96,10 @@ public class BlackboxTest {
                 assertThat(packet.version.version.value, is(0x0005));
             } while (buffer.hasRemaining());
         }
+    }
+
+    @Override
+    public DnsResolver getDnsResolver() {
+        return new NullDnsResolver();
     }
 }

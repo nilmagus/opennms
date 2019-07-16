@@ -97,7 +97,7 @@ public class ExtendedGateway implements FlowData {
     public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("nexthop");
-        this.nexthop.writeBson(bsonWriter);
+        this.nexthop.writeBson(bsonWriter, svcs);
         bsonWriter.writeInt64("as", this.as);
         bsonWriter.writeInt64("src_as", this.src_as);
         bsonWriter.writeInt64("src_peer_as", this.src_peer_as);

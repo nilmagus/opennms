@@ -84,11 +84,11 @@ public class AppOperation implements FlowData {
         bsonWriter.writeStartDocument();
 
         bsonWriter.writeName("context");
-        this.context.writeBson(bsonWriter);
+        this.context.writeBson(bsonWriter, svcs);
 
         bsonWriter.writeStartArray("status_descr");
         for (final Utf8string utf8string : this.status_descr) {
-            utf8string.writeBson(bsonWriter);
+            utf8string.writeBson(bsonWriter, svcs);
         }
         bsonWriter.writeEndArray();
 
@@ -99,7 +99,7 @@ public class AppOperation implements FlowData {
         bsonWriter.writeInt64("uS", this.uS);
 
         bsonWriter.writeName("status");
-        this.status.writeBson(bsonWriter);
+        this.status.writeBson(bsonWriter, svcs);
 
         bsonWriter.writeEndDocument();
     }

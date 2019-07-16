@@ -56,6 +56,6 @@ public class ExtendedL2TunnelIngress implements FlowData {
 
     @Override
     public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
-        this.header.writeBson(bsonWriter);
+        this.header.writeBson(bsonWriter, svcs);
     }
 }

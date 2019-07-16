@@ -82,7 +82,7 @@ public class HostDescr implements CounterData {
         bsonWriter.writeName("machine_type");
         this.machine_type.writeBson(bsonWriter);
         bsonWriter.writeName("os_name");
-        this.os_name.writeBson(bsonWriter);
+        this.os_name.writeBson(bsonWriter, svcs);
         bsonWriter.writeString("os_release", this.os_release.value);
         bsonWriter.writeEndDocument();
     }

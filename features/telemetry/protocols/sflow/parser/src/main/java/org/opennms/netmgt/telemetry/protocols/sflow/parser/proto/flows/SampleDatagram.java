@@ -31,6 +31,7 @@ package org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows;
 import java.nio.ByteBuffer;
 
 import org.bson.BsonWriter;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 
 import com.google.common.base.MoreObjects;
@@ -54,7 +55,7 @@ public class SampleDatagram {
     }
 
 
-    public void writeBson(final BsonWriter bsonWriter) {
-        this.version.writeBson(bsonWriter);
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
+        this.version.writeBson(bsonWriter, svcs);
     }
 }

@@ -103,9 +103,9 @@ public class Extended80211Tx implements FlowData {
         bsonWriter.writeString("ssid", this.ssid.value);
 
         bsonWriter.writeName("bssid");
-        this.bssid.writeBson(bsonWriter);
+        this.bssid.writeBson(bsonWriter, svcs);
         bsonWriter.writeName("version");
-        this.version.writeBson(bsonWriter);
+        this.version.writeBson(bsonWriter, svcs);
 
         bsonWriter.writeInt64("transmissions", this.transmissions);
         bsonWriter.writeName("packet_duration");

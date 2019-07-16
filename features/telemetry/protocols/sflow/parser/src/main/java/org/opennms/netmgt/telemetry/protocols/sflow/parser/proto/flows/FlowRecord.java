@@ -99,7 +99,7 @@ public class FlowRecord extends Record<FlowData> {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         if (data.value != null) {
             this.data.value.writeBson(bsonWriter, svcs);
         } else {

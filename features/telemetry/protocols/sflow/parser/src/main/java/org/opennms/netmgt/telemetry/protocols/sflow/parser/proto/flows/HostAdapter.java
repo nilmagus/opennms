@@ -33,6 +33,7 @@ import java.util.Optional;
 
 import org.bson.BsonWriter;
 import org.opennms.netmgt.telemetry.common.utils.BufferUtils;
+import org.opennms.netmgt.telemetry.protocols.sflow.parser.DatagramServices;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.InvalidPacketException;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Array;
 
@@ -63,12 +64,12 @@ public class HostAdapter {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter) {
+    public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64(this.ifIndex);
         bsonWriter.writeStartArray("mac_address");
         for (final Mac mac : this.mac_address) {
-            mac.writeBson(bsonWriter);
+            mac.writeBson(bsonWriter, svcs);
         }
         bsonWriter.writeEndArray();
         bsonWriter.writeEndDocument();

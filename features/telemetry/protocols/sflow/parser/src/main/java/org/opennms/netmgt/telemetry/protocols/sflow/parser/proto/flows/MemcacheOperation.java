@@ -86,7 +86,7 @@ public class MemcacheOperation implements CounterData {
     public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("protocol");
-        this.protocol.writeBson(bsonWriter);
+        this.protocol.writeBson(bsonWriter, svcs);
         bsonWriter.writeName("cmd");
         this.cmd.writeBson(bsonWriter, svcs);
         bsonWriter.writeString("key", this.key.value);
@@ -94,7 +94,7 @@ public class MemcacheOperation implements CounterData {
         bsonWriter.writeInt64("value_bytes", this.value_bytes);
         bsonWriter.writeInt64("uS", this.uS);
         bsonWriter.writeName("status");
-        this.status.writeBson(bsonWriter);
+        this.status.writeBson(bsonWriter, svcs);
         bsonWriter.writeEndDocument();
     }
 }

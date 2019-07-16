@@ -61,7 +61,7 @@ public class Extended80211Aggregation implements FlowData {
         bsonWriter.writeStartArray();
 
         for (final Pdu pdu : this.pdus) {
-            pdu.writeBson(bsonWriter);
+            pdu.writeBson(bsonWriter, svcs);
         }
 
         bsonWriter.writeEndArray();

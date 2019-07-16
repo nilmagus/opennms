@@ -57,7 +57,7 @@ public class Actor {
     public void writeBson(final BsonWriter bsonWriter, final DatagramServices svcs) {
         bsonWriter.writeStartArray();
         for(final Utf8string utf8string : this.actor) {
-            utf8string.writeBson(bsonWriter);
+            utf8string.writeBson(bsonWriter, svcs);
         }
         bsonWriter.writeEndArray();
     }
