@@ -128,8 +128,8 @@
     </feature>
 
     <feature name="minion-telemetryd-receivers" description="Minion :: Telemetry :: Receivers" version="${project.version}">
-      <!-- Not fully needed, but a convenient way to install netty4 -->
-      <feature>camel-netty4</feature>
+      <feature>netty4</feature>
+      <feature>opennms-dnsresolver-netty</feature>
       <bundle>mvn:com.google.protobuf/protobuf-java/${protobufVersion}</bundle>
       <bundle>mvn:org.mongodb/bson/${bsonVersion}</bundle>
       <bundle>mvn:org.apache.commons/commons-csv/${commonsCsvVersion}</bundle>
@@ -145,6 +145,5 @@
       <bundle>mvn:org.opennms.features.telemetry.distributed/org.opennms.features.telemetry.distributed.common/${project.version}</bundle>
       <bundle>mvn:org.opennms.features.telemetry.distributed/org.opennms.features.telemetry.distributed.minion/${project.version}</bundle>
     </feature>
-
 
 </features>
