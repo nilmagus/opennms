@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.dnsresolver.api.DnsResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,7 @@ import io.netty.resolver.dns.DefaultDnsCache;
 import io.netty.resolver.dns.DnsCache;
 import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
+import io.netty.resolver.dns.SequentialDnsServerAddressStreamProvider;
 import io.netty.util.concurrent.Future;
 
 /**
@@ -76,6 +78,7 @@ public class NettyDnsResolver implements DnsResolver {
 
         resolver = new DnsNameResolverBuilder(group.next())
                 .channelType(NioDatagramChannel.class)
+                .nameServerProvider(new SequentialDnsServerAddressStreamProvider(new InetSocketAddress(InetAddressUtils.getLocalHostAddress(), 53)))
                 //.nameServerAddresses(DnsServerAddresses.defaultAddresses())
                 .maxQueriesPerResolve(1)
                 .optResourceEnabled(false)

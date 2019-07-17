@@ -75,8 +75,8 @@ public class NettyDnsResolverTest {
         assertThat(dnsResolver.reverseLookup(InetAddressUtils.addr("fe80::")).get().isPresent(), equalTo(false));
     }
 
-    @Ignore
     @Test
+    @Ignore
     public void canPerformManyLookupsQuickly() throws UnknownHostException, ExecutionException, InterruptedException {
         final int numLookups = 254;
         Stopwatch stopwatch = Stopwatch.createStarted();
@@ -85,18 +85,26 @@ public class NettyDnsResolverTest {
         final Set<Optional<String>> results = new LinkedHashSet<>();
         System.out.printf("Issuing %d reverse lookups asynchronously.\n", numLookups);
         for (InetAddress addr = InetAddressUtils.addr("10.0.0.1");
-             !addr.equals(InetAddressUtils.addr("10.0.1.255"));
+             !addr.equals(InetAddressUtils.addr("10.0.0.255"));
              addr = InetAddressUtils.addr(InetAddressUtils.incr(InetAddressUtils.str(addr)))) {
-            futures.add(dnsResolver.reverseLookup(addr));
-            dnsResolver.reverseLookup(addr).whenComplete((hostname,ex) -> {
-                results.add(hostname);
-            });
+
+            final CompletableFuture<Optional<String>> future = dnsResolver.reverseLookup(addr);
+            future.whenComplete((hostname,ex) -> results.add(hostname));
+            futures.add(future);
         }
 
         // Wait
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[]{})).get();
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[]{})).get();
+        } catch (ExecutionException e) {
+            System.out.println("One or more queries failed.");
+        }
         stopwatch.stop();
         System.out.printf("Processed %d requests in %dms.\n", futures.size(), stopwatch.elapsed(MILLISECONDS));
+
+        final long numLookupsSuccessful = futures.stream().filter(f -> !f.isCompletedExceptionally()).count();
+        final long numLookupsFailed = futures.stream().filter(CompletableFuture::isCompletedExceptionally).count();
+        System.out.printf("%d lookups were successful and %d lookups failed.\n", numLookupsSuccessful, numLookupsFailed);
 
         // Validate
         assertThat(futures, hasSize(numLookups));
