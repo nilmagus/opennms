@@ -130,7 +130,7 @@
         <bundle>mvn:commons-net/commons-net/3.6</bundle>
     </feature>
     <feature name="dnsjava" version="${dnsjavaVersion}" description="dnsjava">
-        <bundle dependency="true">wrap:mvn:dnsjava/dnsjava/${dnsjavaVersion}</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.dnsjava/${dnsjavaVersion}</bundle>
     </feature>
     <feature name="dropwizard-metrics" version="${dropwizardMetricsVersion}" description="Dropwizard :: Metrics">
         <bundle>mvn:io.dropwizard.metrics/metrics-core/${dropwizardMetricsVersion}</bundle>
@@ -1011,11 +1011,12 @@
         <details>Feature definition to start all required bundles related to *flow-support.</details>
         <feature>opennms-health</feature>
         <feature>opennms-jest</feature>
+        <feature>netty</feature>
         <feature>quartz</feature>
-        <feature>camel-netty4</feature>
         <feature>opennms-core-tracing</feature>
         <feature>opennms-distributed-core-api</feature>
         <feature>opennms-telemetry-collection</feature>
+        <feature>opennms-dnsresolver-netty</feature>
         <bundle>wrap:mvn:org.apache.commons/commons-csv/${commonsCsvVersion}</bundle>
         <bundle>mvn:org.apache.commons/commons-csv/${commonsCsvVersion}</bundle>
         <bundle>mvn:org.mongodb/bson/${bsonVersion}</bundle>
@@ -1439,4 +1440,37 @@
         <bundle>wrap:mvn:net.sf.jung/jung-api/${jungVersion}</bundle>
         <bundle>mvn:org.opennms/opennms-model/${project.version}</bundle>
     </feature>
+
+    <feature name="opennms-dnsresolver-api" version="${project.version}" description="OpenNMS :: Features :: DNS Resolver :: API">
+        <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.api/${project.version}</bundle>
+    </feature>
+
+    <feature name="opennms-dnsresolver-dnsjava" version="${project.version}" description="OpenNMS :: Features :: DNS Resolver :: Netty">
+        <feature version="${project.version}">opennms-dnsresolver-api</feature>
+        <feature version="${dnsjavaVersion}">dnsjava</feature>
+        <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.dnsjava/${project.version}</bundle>
+    </feature>
+
+    <feature name="opennms-dnsresolver-netty" version="${project.version}" description="OpenNMS :: Features :: DNS Resolver :: Netty">
+        <feature version="${project.version}">opennms-dnsresolver-api</feature>
+        <feature version="${dnsjavaVersion}">dnsjava</feature>
+        <feature version="${netty4Version}">netty</feature>
+        <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.netty/${project.version}</bundle>
+    </feature>
+
+    <feature name="netty" version="${netty4Version}" description="Netty">
+        <bundle>mvn:io.netty/netty-resolver/${netty4Version}</bundle>
+        <bundle>mvn:io.netty/netty-common/${netty4Version}</bundle>
+        <bundle>mvn:io.netty/netty-buffer/${netty4Version}</bundle>
+        <bundle>mvn:io.netty/netty-transport/${netty4Version}</bundle>
+        <bundle>mvn:io.netty/netty-handler/${netty4Version}</bundle>
+        <bundle>mvn:io.netty/netty-codec/${netty4Version}</bundle>
+        <bundle>mvn:io.netty/netty-codec-dns/${netty4Version}</bundle>
+        <bundle>mvn:io.netty/netty-resolver-dns/${netty4Version}</bundle>
+        <!--
+        <bundle>mvn:io.netty/netty-transport-native-epoll/${netty4Version}</bundle>
+        <bundle>mvn:io.netty/netty-transport-native-unix-common/${netty4Version}</bundle>
+        -->
+    </feature>
+
 </features>

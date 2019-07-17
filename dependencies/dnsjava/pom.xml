@@ -16,8 +16,8 @@
   </description>
   <dependencies>
     <dependency>
-      <groupId>dnsjava</groupId>
-      <artifactId>dnsjava</artifactId>
+      <groupId>org.apache.servicemix.bundles</groupId>
+      <artifactId>org.apache.servicemix.bundles.dnsjava</artifactId>
       <version>${dnsjavaVersion}</version>
     </dependency>
   </dependencies>

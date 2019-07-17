@@ -28,17 +28,29 @@
 
 package org.opennms.netmgt.dnsresolver.netty;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.core.utils.InetAddressUtils;
+
+import com.google.common.base.Stopwatch;
 
 public class NettyDnsResolverTest {
 
@@ -61,5 +73,34 @@ public class NettyDnsResolverTest {
         assertThat(dnsResolver.reverseLookup(InetAddress.getByName("173.242.186.51")).get().get(), equalTo("rnd.opennms.ca"));
         // TESTNET
         assertThat(dnsResolver.reverseLookup(InetAddressUtils.addr("fe80::")).get().isPresent(), equalTo(false));
+    }
+
+    @Ignore
+    @Test
+    public void canPerformManyLookupsQuickly() throws UnknownHostException, ExecutionException, InterruptedException {
+        final int numLookups = 254;
+        Stopwatch stopwatch = Stopwatch.createStarted();
+
+        final List<CompletableFuture<Optional<String>>> futures = new ArrayList<>();
+        final Set<Optional<String>> results = new LinkedHashSet<>();
+        System.out.printf("Issuing %d reverse lookups asynchronously.\n", numLookups);
+        for (InetAddress addr = InetAddressUtils.addr("10.0.0.1");
+             !addr.equals(InetAddressUtils.addr("10.0.1.255"));
+             addr = InetAddressUtils.addr(InetAddressUtils.incr(InetAddressUtils.str(addr)))) {
+            futures.add(dnsResolver.reverseLookup(addr));
+            dnsResolver.reverseLookup(addr).whenComplete((hostname,ex) -> {
+                results.add(hostname);
+            });
+        }
+
+        // Wait
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[]{})).get();
+        stopwatch.stop();
+        System.out.printf("Processed %d requests in %dms.\n", futures.size(), stopwatch.elapsed(MILLISECONDS));
+
+        // Validate
+        assertThat(futures, hasSize(numLookups));
+        assertThat(results, hasSize(1));
+        assertThat(results, contains(Optional.<String>empty()));
     }
 }

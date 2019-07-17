@@ -44,8 +44,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.flows.api.Flow;
-import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
-import org.opennms.netmgt.telemetry.common.utils.NullDnsResolver;
 import org.opennms.netmgt.telemetry.protocols.sflow.adapter.SFlow;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichment;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.Array;

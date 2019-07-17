@@ -32,8 +32,6 @@ import org.bson.json.JsonWriter;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.opennms.netmgt.telemetry.common.utils.DnsResolver;
-import org.opennms.netmgt.telemetry.common.utils.NullDnsResolver;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.Record;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.SampleDatagram;
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.proto.flows.SampleRecord;

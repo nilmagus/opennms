@@ -56,7 +56,6 @@ import io.netty.resolver.dns.DefaultDnsCache;
 import io.netty.resolver.dns.DnsCache;
 import io.netty.resolver.dns.DnsNameResolver;
 import io.netty.resolver.dns.DnsNameResolverBuilder;
-import io.netty.resolver.dns.DnsServerAddresses;
 import io.netty.util.concurrent.Future;
 
 /**
@@ -77,7 +76,7 @@ public class NettyDnsResolver implements DnsResolver {
 
         resolver = new DnsNameResolverBuilder(group.next())
                 .channelType(NioDatagramChannel.class)
-                .nameServerAddresses(DnsServerAddresses.defaultAddresses())
+                //.nameServerAddresses(DnsServerAddresses.defaultAddresses())
                 .maxQueriesPerResolve(1)
                 .optResourceEnabled(false)
                 .resolveCache(cache)
