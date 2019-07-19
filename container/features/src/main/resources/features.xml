@@ -1458,6 +1458,12 @@
         <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.netty/${project.version}</bundle>
     </feature>
 
+    <feature name="opennms-dnsresolver-unbound4j" version="${project.version}" description="OpenNMS :: Features :: DNS Resolver :: Netty">
+        <feature version="${project.version}">opennms-dnsresolver-api</feature>
+        <bundle>mvn:org.opennms/unbound4j/1.0.0-SNAPSHOT</bundle>
+        <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.unbound4j/${project.version}</bundle>
+    </feature>
+
     <feature name="netty" version="${netty4Version}" description="Netty">
         <bundle>mvn:io.netty/netty-resolver/${netty4Version}</bundle>
         <bundle>mvn:io.netty/netty-common/${netty4Version}</bundle>

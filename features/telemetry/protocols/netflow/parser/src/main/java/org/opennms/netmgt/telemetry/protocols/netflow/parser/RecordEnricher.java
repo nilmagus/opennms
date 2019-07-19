@@ -87,7 +87,7 @@ public class RecordEnricher {
             future.complete(enrichment);
         });
 
-        return CompletableFuture.completedFuture(null);
+        return future;
     }
 
     private static class DefaultRecordEnrichment implements RecordEnrichment {
