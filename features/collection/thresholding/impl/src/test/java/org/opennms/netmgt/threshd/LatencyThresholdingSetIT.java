@@ -145,7 +145,7 @@ public class LatencyThresholdingSetIT implements TemporaryDatabaseAware<MockData
     private Map<String, String> mockIfInfo;
 
     @Autowired
-    private ThresholdingService m_thresholdingService;
+    private ThresholdingServiceImpl m_thresholdingService;
 
     private int m_nodeId = 1;
     private String m_svcName = "HTTP";
@@ -276,7 +276,10 @@ public class LatencyThresholdingSetIT implements TemporaryDatabaseAware<MockData
         PollOutagesConfigFactory.getInstance().afterPropertiesSet();
         initFactories("/threshd-configuration.xml","/test-thresholds.xml");
         m_anticipatedEvents = new ArrayList<>();
-    };
+
+        // Update the thresholding service to use the mock event manager
+        m_thresholdingService.setEventProxy(m_eventIpcManager);
+    }
     
     private void initFactories(String threshd, String thresholds) throws Exception {
         LOG.info("Initialize Threshold Factories");

@@ -44,6 +44,7 @@ import org.opennms.netmgt.config.ThreshdConfigFactory;
 import org.opennms.netmgt.config.ThresholdingConfigFactory;
 import org.opennms.netmgt.dao.api.ResourceStorageDao;
 import org.opennms.netmgt.events.api.EventConstants;
+import org.opennms.netmgt.events.api.EventForwarder;
 import org.opennms.netmgt.events.api.EventIpcManager;
 import org.opennms.netmgt.events.api.EventListener;
 import org.opennms.netmgt.rrd.RrdRepository;
@@ -74,11 +75,9 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
                                EventConstants.RELOAD_DAEMON_CONFIG_UEI,
                                EventConstants.THRESHOLDCONFIG_CHANGED_EVENT_UEI);
 
-    @Autowired
-    private ThresholdingEventProxy eventProxy;
-
-    @Autowired
     private ThresholdingSetPersister thresholdingSetPersister;
+
+    private ThresholdingEventProxy eventProxy;
 
     @Autowired
     private ResourceStorageDao resourceStorageDao;
@@ -92,15 +91,35 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
             .blocking()
             .build();
 
+    // Spring init entry point
     @PostConstruct
     private void init() {
         try {
             ThreshdConfigFactory.init();
             ThresholdingConfigFactory.init();
+            // When we are on OpenNMS we will have been wired an event manager and can listen for events
             eventIpcManager.addEventListener(this, UEI_LIST);
         } catch (final Exception e) {
             throw new RuntimeException("Unable to initialize thresholding.", e);
         }
+    }
+    
+    // OSGi init entry point
+    public void initOsgi() {
+        try {
+            ThreshdConfigFactory.init();
+            ThresholdingConfigFactory.init();
+            // TODO: call this on a timer
+            // On Sentinel we won't have access to an event manager so we will have to manage config updates via timer
+            reinitializeOnTimer();
+        } catch (final Exception e) {
+            throw new RuntimeException("Unable to initialize thresholding.", e);
+        }
+    }
+    
+    private void reinitializeOnTimer() {
+        ThreshdConfigFactory.getInstance().rebuildPackageIpListMap();
+        thresholdingSetPersister.reinitializeThresholdingSets();
     }
 
     @Override
@@ -168,20 +187,10 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
         return new ThresholdingVisitorImpl(thresholdingSet, ((ThresholdingSessionImpl) session).getResourceDao(), eventProxy);
     }
 
-    public EventIpcManager getEventIpcManager() {
-        return eventIpcManager;
-    }
-
-    public void setEventIpcManager(EventIpcManager eventIpcManager) {
-        this.eventIpcManager = eventIpcManager;
-    }
-
-    public ThresholdingEventProxy getEventProxy() {
-        return eventProxy;
-    }
-
-    public void setEventProxy(ThresholdingEventProxy eventProxy) {
-        this.eventProxy = eventProxy;
+    @Autowired
+    public void setEventProxy(EventForwarder eventForwarder) {
+        Objects.requireNonNull(eventForwarder);
+        eventProxy = new ThresholdingEventProxyImpl(eventForwarder);
     }
 
     public ThresholdingSetPersister getThresholdingSetPersister() {
@@ -227,6 +236,16 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
             throw new RuntimeException("Timed out waiting for a key value store");
         } else {
             kvStore.set(osgiKvStore);
+        }
+    }
+
+    public void setKvStore(KeyValueStore keyValueStore) {
+        Objects.requireNonNull(keyValueStore);
+
+        synchronized (kvStore) {
+            if (kvStore.get() == null) {
+                kvStore.set(keyValueStore);
+            }
         }
     }
 }

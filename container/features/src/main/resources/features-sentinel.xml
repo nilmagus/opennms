@@ -241,4 +241,18 @@
         <feature>sentinel-kvstore-api</feature><feature>sentinel-kvstore-api</feature>
         <bundle>mvn:org.opennms.features.distributed/org.opennms.features.distributed.kv-store.cassandra/${project.version}</bundle>
     </feature>
+
+    <feature name="sentinel-thresholding-service" description="OpenNMS :: Thresholding :: Impl"
+             version="${project.version}">
+        <feature>opennms-thresholding-api</feature>
+        <feature>opennms-events-sink-dispatcher</feature>
+        <feature>opennms-measurements-api</feature>
+        <feature>opennms-core-ipc-rpc-api</feature>
+        <bundle>mvn:org.opennms.features.collection/org.opennms.features.collection.thresholding.impl/${project.version}</bundle>
+
+        <bundle>mvn:org.opennms.features.collection/org.opennms.features.collection.snmp-collector/${project.version}</bundle>
+
+        <!--TODO: I'm assuming this can go away once we are using the new config model-->
+        <bundle>mvn:org.opennms/opennms-dao/${project.version}</bundle>
+    </feature>
 </features>

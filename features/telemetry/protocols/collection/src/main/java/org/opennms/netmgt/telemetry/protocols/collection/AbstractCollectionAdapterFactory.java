@@ -59,7 +59,7 @@ public abstract class AbstractCollectionAdapterFactory implements AdapterFactory
     @Autowired
     private PersisterFactory persisterFactory;
 
-    @Autowired(required = false)
+    @Autowired
     private ThresholdingService thresholdingService;
 
     private final BundleContext bundleContext;
@@ -126,13 +126,5 @@ public abstract class AbstractCollectionAdapterFactory implements AdapterFactory
 
     public void setThresholdingService(ThresholdingService thresholdingService) {
         this.thresholdingService = thresholdingService;
-    }
-
-    public void bind(ThresholdingService thresholdingService) {
-        this.thresholdingService = thresholdingService;
-    }
-
-    public void unbind(ThresholdingService thresholdingService) {
-        this.thresholdingService = null;
     }
 }

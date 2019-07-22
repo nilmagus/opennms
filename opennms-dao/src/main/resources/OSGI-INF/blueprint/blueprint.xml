@@ -1,0 +1,13 @@
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+    <!--TODO: Not sure if this is temporary or not-->
+    <bean id="interfaceToNodeCache" class="org.opennms.netmgt.dao.hibernate.InterfaceToNodeCacheDaoImpl">
+        <!-- TODO: derive -->
+        <argument value="300000" />
+    </bean>
+    <service interface="org.opennms.netmgt.dao.api.InterfaceToNodeCache" ref="interfaceToNodeCache" />
+    
+    <bean id="nodeDao" class="org.opennms.netmgt.dao.hibernate.NodeDaoHibernate">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <service interface="org.opennms.netmgt.dao.api.NodeDao" ref="nodeDao" />
+</blueprint>
