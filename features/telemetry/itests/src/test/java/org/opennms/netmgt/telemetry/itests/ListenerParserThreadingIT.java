@@ -56,6 +56,8 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Reco
 import org.opennms.test.ThreadLocker;
 import org.springframework.util.SocketUtils;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class ListenerParserThreadingIT implements AsyncDispatcher<TelemetryMessage> {
 
     private final AtomicInteger messagesSent = new AtomicInteger();
@@ -88,7 +90,7 @@ public class ListenerParserThreadingIT implements AsyncDispatcher<TelemetryMessa
         int udpPort = SocketUtils.findAvailableUdpPort();
         Netflow5UdpParser parser = new Netflow5UdpParser("FLOW", this, eventForwarder, identity, dnsResolver);
         parser.setThreads(NUM_THREADS);
-        UdpListener listener = new UdpListener("FLOW", Collections.singletonList(parser));
+        UdpListener listener = new UdpListener("FLOW", Collections.singletonList(parser), new MetricRegistry());
         listener.setPort(udpPort);
         listener.start();
 
