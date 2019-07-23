@@ -51,13 +51,26 @@ public class MockCollectionResource implements CollectionResource {
     
     private final ResourcePath parent;
     private String instance;
+    private String unmodifiedInstance;
     private final String type;
     private final Map<String,String> attributes = new HashMap<String,String>();
     
     public MockCollectionResource(ResourcePath parent, String instance, String type) {
+        this(parent, instance, instance, type);
+    }
+
+    public MockCollectionResource(ResourcePath parent, String instance, String unmodifiedInstance, String type) {
         this.parent = parent;
-        this.instance = instance;
+        this.instance = sanitizeInstance(instance);
+        this.unmodifiedInstance = unmodifiedInstance;
         this.type = type;
+    }
+
+    /**
+     * Copied from GenericTypeResource
+     */
+    private static String sanitizeInstance(String instance) {
+        return instance.replaceAll("\\s+", "_").replaceAll(":", "_").replaceAll("\\\\", "_").replaceAll("[\\[\\]]", "_");
     }
 
     @Override
@@ -139,7 +152,11 @@ public class MockCollectionResource implements CollectionResource {
 
     @Override
     public String getUnmodifiedInstance() {
-        return instance;
+        return unmodifiedInstance;
+    }
+
+    public void setUnmodifiedInstance(String instance) {
+        this.unmodifiedInstance = instance;
     }
 
     @Override

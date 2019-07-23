@@ -205,7 +205,7 @@ public class AliasedResource extends SnmpCollectionResource {
 
     @Override
     public String getUnmodifiedInstance() {
-        return null; //For node and interface type resources, use the default instance
+        return getInstance();
     }
 
     @Override

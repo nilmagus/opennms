@@ -78,7 +78,7 @@ public class LatencyCollectionResource implements CollectionResource {
      */
     @Override
     public String getUnmodifiedInstance() {
-        return m_ipAddress + "[" + m_serviceName + "]";
+        return getInstance();
     }
 
     /**

@@ -63,7 +63,7 @@ public class InterfaceLevelResource extends AbstractResource {
 
     @Override
     public String getUnmodifiedInstance() {
-        return m_ifName;
+        return getInstance();
     }
 
     @Override

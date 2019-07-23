@@ -109,7 +109,7 @@ public class GenericIndexResource extends SnmpCollectionResource {
 
     @Override
     public String getUnmodifiedInstance() {
-        return m_inst.toString();
+        return getInstance();
     }
 
     private StorageStrategy getStrategy() {
