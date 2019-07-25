@@ -1347,6 +1347,7 @@
     <quartzVersion>2.2.3</quartzVersion>
     <rancidApiVersion>1.0.4</rancidApiVersion>
     <rateLimitedLoggerVersion>1.1.0</rateLimitedLoggerVersion>
+    <resilience4jVersion>0.17.0</resilience4jVersion>
     <rocksdbjniVersion>5.15.10</rocksdbjniVersion>
     <scalaLibraryVersion>2.12.8</scalaLibraryVersion>
     <scalaLoggingVersion>3.9.0</scalaLoggingVersion>

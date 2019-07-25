@@ -92,6 +92,11 @@ public class ClockSkewTest {
     private DnsResolver dnsResolver = new DnsResolver() {
 
         @Override
+        public CompletableFuture<Optional<InetAddress>> lookup(final String hostname) {
+            return CompletableFuture.completedFuture(Optional.empty());
+        }
+
+        @Override
         public CompletableFuture<Optional<String>> reverseLookup(InetAddress inetAddress) {
             return CompletableFuture.completedFuture(Optional.empty());
         }

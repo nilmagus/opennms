@@ -30,99 +30,202 @@ package org.opennms.netmgt.dnsresolver.netty;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
-import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.dnsresolver.api.DnsResolver;
+import org.opennms.netmgt.events.api.EventForwarder;
+import org.opennms.netmgt.model.events.EventBuilder;
+import org.opennms.netmgt.xml.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xbill.DNS.ReverseMap;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+import com.google.common.base.Strings;
 
-import io.netty.channel.AddressedEnvelope;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioDatagramChannel;
-import io.netty.handler.codec.dns.DefaultDnsQuestion;
-import io.netty.handler.codec.dns.DnsPtrRecord;
-import io.netty.handler.codec.dns.DnsRecord;
-import io.netty.handler.codec.dns.DnsRecordType;
-import io.netty.handler.codec.dns.DnsResponse;
-import io.netty.handler.codec.dns.DnsResponseCode;
-import io.netty.handler.codec.dns.DnsSection;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.netty.resolver.dns.DefaultDnsCache;
 import io.netty.resolver.dns.DnsCache;
-import io.netty.resolver.dns.DnsNameResolver;
-import io.netty.resolver.dns.DnsNameResolverBuilder;
+import io.netty.resolver.dns.DnsNameResolverTimeoutException;
+import io.netty.resolver.dns.DnsServerAddressStreamProvider;
+import io.netty.resolver.dns.DnsServerAddressStreamProviders;
 import io.netty.resolver.dns.SequentialDnsServerAddressStreamProvider;
-import io.netty.util.concurrent.Future;
+import io.netty.util.internal.SocketUtils;
 
 /**
- * TODO: Expose lookup and cache metrics via a MetricRegistry
+ * Asynchronous DNS resolution using Netty.
+ *
+ * Creates multiple resolvers (aka contexts) against which the queries
+ * are randomized in order to improve performance. By default we create 2 * num cores
+ * contexts.
+ *
+ * Uses a circuit breaker in order to ensure that callers do not continue to be bogged down
+ * if resolution fails.
+ *
+ * @author jwhite
  */
 public class NettyDnsResolver implements DnsResolver {
     private static final Logger LOG = LoggerFactory.getLogger(NettyDnsResolver.class);
 
-    private EventLoopGroup group;
-    private DnsNameResolver resolver;
+    public static final String CIRCUIT_BREAKER_STATE_CHANGE_EVENT_UEI = "uei.opennms.org/circuitBreaker/stateChange";
+
+    private final EventForwarder eventForwarder;
+    private final Timer lookupTimer;
+    private final Meter lookupsSuccessful;
+    private final Meter lookupsFailed;
+    private final Meter lookupsRejectedByCircuitBreaker;
+
+    private int numContexts = 0;
+    private String nameservers = null;
+    private long queryTimeoutMillis = TimeUnit.SECONDS.toMillis(5);
+
+    private List<NettyResolverContext> contexts;
+    private Iterator<NettyResolverContext> iterator;
+    private DnsCache cache;
+
+    private CircuitBreaker circuitBreaker;
+
+    public NettyDnsResolver(EventForwarder eventForwarder, MetricRegistry metrics) {
+        this.eventForwarder = Objects.requireNonNull(eventForwarder);
+        lookupTimer = metrics.timer("lookups");
+        lookupsSuccessful = metrics.meter("lookupsSuccessful");
+        lookupsFailed = metrics.meter("lookupsFailed");
+        lookupsRejectedByCircuitBreaker = metrics.meter("lookupsRejectedByCircuitBreaker");
+    }
 
     public void init() {
-        group = new NioEventLoopGroup(4, new ThreadFactoryBuilder()
-                .setNameFormat("NettyDnsResolver-NIO-Event-Loop-%d")
-                .build());
+        numContexts = Math.max(0, numContexts);
+        if (numContexts == 0) {
+            numContexts = Runtime.getRuntime().availableProcessors() * 2;
+        }
+        LOG.debug("Initializing Netty resolver with {} contexts and resolvers: {}", numContexts);
 
-        DnsCache cache = new DefaultDnsCache();
+        contexts = new ArrayList<>(numContexts);
+        cache = new DefaultDnsCache();
+        for (int i = 0; i < numContexts; i++) {
+            NettyResolverContext context = new NettyResolverContext(this, cache, i);
+            context.init();
+            contexts.add(context);
+        }
+        iterator = new RandomIterator<>(contexts).iterator();
 
-        resolver = new DnsNameResolverBuilder(group.next())
-                .channelType(NioDatagramChannel.class)
-                .nameServerProvider(new SequentialDnsServerAddressStreamProvider(new InetSocketAddress(InetAddressUtils.getLocalHostAddress(), 53)))
-                //.nameServerAddresses(DnsServerAddresses.defaultAddresses())
-                .maxQueriesPerResolve(1)
-                .optResourceEnabled(false)
-                .resolveCache(cache)
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(80)
+                .waitDurationInOpenState(Duration.ofSeconds(30))
+                .ringBufferSizeInHalfOpenState(10)
+                .ringBufferSizeInClosedState(100)
+                .recordExceptions(DnsNameResolverTimeoutException.class)
                 .build();
+        circuitBreaker = CircuitBreaker.of("nettyDnsResolver", circuitBreakerConfig);
+
+        circuitBreaker.getEventPublisher()
+                .onStateTransition(e -> {
+                    // Send an event when the circuit breaker's state changes
+                    final Event event = new EventBuilder(CIRCUIT_BREAKER_STATE_CHANGE_EVENT_UEI, NettyDnsResolver.class.getCanonicalName())
+                            .addParam("name", circuitBreaker.getName())
+                            .addParam("fromState", e.getStateTransition().getFromState().toString())
+                            .addParam("toState", e.getStateTransition().getToState().toString())
+                            .getEvent();
+                    eventForwarder.sendNow(event);
+                })
+                .onSuccess(e -> {
+                    lookupsSuccessful.mark();
+                })
+                .onError(e -> {
+                    lookupsFailed.mark();
+                })
+                .onCallNotPermitted(e -> {
+                    lookupsRejectedByCircuitBreaker.mark();
+                });
     }
 
     public void destroy() {
-        if (group != null) {
-            group.shutdownGracefully();
+        for (NettyResolverContext context : contexts) {
+            try {
+                context.destroy();
+            } catch (Exception e) {
+                LOG.warn("Error occurred while destroying context.", e);
+            }
         }
-        if (resolver != null) {
-            resolver.close();
-        }
+        contexts.clear();
+    }
+
+    @Override
+    public CompletableFuture<Optional<InetAddress>> lookup(String hostname) {
+        return circuitBreaker.executeCompletionStage(() -> {
+            final NettyResolverContext resolverContext = iterator.next();
+            final Timer.Context timerContext = lookupTimer.time();
+            return resolverContext.lookup(hostname).whenComplete((res, ex) -> {
+                timerContext.stop();
+            });
+        }).toCompletableFuture();
     }
 
     @Override
     public CompletableFuture<Optional<String>> reverseLookup(InetAddress inetAddress) {
-        final CompletableFuture<Optional<String>> future = new CompletableFuture<>();
-        final String name = ReverseMap.fromAddress(inetAddress).toString();
-        final Future<AddressedEnvelope<DnsResponse, InetSocketAddress>> requestFuture = resolver.query(new DefaultDnsQuestion(name, DnsRecordType.PTR, DnsRecord.CLASS_IN));
-        requestFuture.addListener(responseFuture -> {
-            try {
-                final AddressedEnvelope<DnsResponse, InetSocketAddress> envelope = (AddressedEnvelope<DnsResponse, InetSocketAddress>) responseFuture.get();
-                final DnsResponse response = envelope.content();
-                if (response.code() != DnsResponseCode.NOERROR) {
-                    future.complete(Optional.empty());
-                    return;
-                }
+        return circuitBreaker.executeCompletionStage(() -> {
+            final NettyResolverContext resolverContext = iterator.next();
+            final Timer.Context timerContext = lookupTimer.time();
+            return resolverContext.reverseLookup(inetAddress).whenComplete((res, ex) -> {
+                timerContext.stop();
+            });
+        }).toCompletableFuture();
+    }
 
-                final DnsPtrRecord ptrRecord = envelope.content().recordAt(DnsSection.ANSWER);
-                if (ptrRecord == null) {
-                    future.complete(Optional.empty());
-                    return;
-                }
+    public int getNumContexts() {
+        return numContexts;
+    }
 
-                final String hostname = ptrRecord.hostname();
-                // Strip of the trailing dot
-                final String trimmedHostname = hostname.substring(0, hostname.length() - 1);
-                future.complete(Optional.of(trimmedHostname));
-            } catch (InterruptedException|ExecutionException e) {
-                future.completeExceptionally(e);
-            }
-        });
-        return future;
+    public void setNumContexts(int numContexts) {
+        this.numContexts = numContexts;
+    }
+
+    public String getNameservers() {
+        return nameservers;
+    }
+
+    public void setNameservers(String nameservers) {
+        this.nameservers = nameservers;
+    }
+
+    public long getQueryTimeoutMillis() {
+        return queryTimeoutMillis;
+    }
+
+    public void setQueryTimeoutMillis(long queryTimeoutMillis) {
+        this.queryTimeoutMillis = queryTimeoutMillis;
+    }
+
+    public CircuitBreaker getCircuitBreaker() {
+        return circuitBreaker;
+    }
+
+    public DnsServerAddressStreamProvider getNameServerProvider() {
+        if (Strings.isNullOrEmpty(nameservers)) {
+            // Use the platform default
+            return DnsServerAddressStreamProviders.platformDefault();
+        }
+        final String servers[] = nameservers.split(",");
+        return new SequentialDnsServerAddressStreamProvider(Arrays.stream(servers)
+                .map(s -> {
+                    String parts[] = s.split(":");
+                    if (parts.length > 1) {
+                        return SocketUtils.socketAddress(parts[0], Integer.parseInt(parts[1]));
+                    } else {
+                        return SocketUtils.socketAddress(parts[0],53);
+                    }
+                })
+                .toArray(InetSocketAddress[]::new));
     }
 }

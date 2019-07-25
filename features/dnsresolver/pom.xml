@@ -12,9 +12,7 @@
   <name>OpenNMS :: Features :: DNS Resolver</name>
   <modules>
     <module>api</module>
-    <module>dnsjava</module>
     <module>netty</module>
     <module>shell</module>
-    <module>unbound4j</module>
   </modules>
 </project>

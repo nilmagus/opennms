@@ -122,7 +122,11 @@ public class StressCommand implements Action {
                 }
             }
 
-            final List<CompletableFuture<Optional<String>>> futuresToWaitFor = new LinkedList<>(pendingFutures);
+            // Copy the list of pending futures - so they don't change on us
+            final List<CompletableFuture<Optional<String>>> futuresToWaitFor;
+            synchronized (pendingFutures) {
+                futuresToWaitFor = new LinkedList<>(pendingFutures);
+            }
             System.out.printf("Waiting for %d pending requests...\n", futuresToWaitFor.size());
 
             try {

@@ -26,16 +26,41 @@
  *     http://www.opennms.com/
  *******************************************************************************/
 
-package org.opennms.netmgt.dnsresolver.api;
+package org.opennms.netmgt.dnsresolver.netty;
 
-import java.net.InetAddress;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
-public interface DnsResolver {
+public class RandomIterator<T> implements Iterable<T> {
+    private final List<T> items;
+    private final int numItems;
+    private final Random random;
 
-    CompletableFuture<Optional<InetAddress>> lookup(final String hostname);
+    public RandomIterator(final List<T> coll) {
+        items = new ArrayList<>(coll);
+        numItems = items.size();
+        random = new Random();
+    }
 
-    CompletableFuture<Optional<String>> reverseLookup(final InetAddress inetAddress);
+    @Override
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
 
+            @Override
+            public synchronized T next() {
+                return items.get(random.nextInt(numItems));
+            }
+
+            @Override
+            public void remove() {
+                throw new IllegalArgumentException("Cannot remove from " + RandomIterator.class);
+            }
+        };
+    }
 }

@@ -81,6 +81,12 @@ public class ListenerParserThreadingIT implements AsyncDispatcher<TelemetryMessa
         CompletableFuture<Integer> future = threadLocker.waitForThreads(NUM_THREADS);
         DnsResolver dnsResolver = new DnsResolver() {
             @Override
+            public CompletableFuture<Optional<InetAddress>> lookup(String hostname) {
+                threadLocker.park();
+                return CompletableFuture.completedFuture(Optional.empty());
+            }
+
+            @Override
             public CompletableFuture<Optional<String>> reverseLookup(InetAddress inetAddress) {
                 threadLocker.park();
                 return CompletableFuture.completedFuture(Optional.empty());

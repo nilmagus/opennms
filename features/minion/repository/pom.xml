@@ -63,8 +63,8 @@
                                 <feature>hawtio-offline</feature>
                                 <feature>cxf-commands/${cxfVersion}</feature>
                                 <feature>opennms-core-tracing-jaeger</feature>
+                                <feature>opennms-dnsresolver-shell</feature>
                                 <feature>opennms-dnsresolver-netty</feature>
-                                <feature>opennms-dnsresolver-unbound4j</feature>
                             </features>
                             <repository>${project.build.directory}/maven-repo</repository>
                         </configuration>

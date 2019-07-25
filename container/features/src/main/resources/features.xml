@@ -1454,23 +1454,25 @@
         <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.shell/${project.version}</bundle>
     </feature>
 
-    <feature name="opennms-dnsresolver-dnsjava" version="${project.version}" description="OpenNMS :: Features :: DNS Resolver :: Netty">
-        <feature version="${project.version}">opennms-dnsresolver-api</feature>
-        <feature version="${dnsjavaVersion}">dnsjava</feature>
-        <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.dnsjava/${project.version}</bundle>
-    </feature>
-
     <feature name="opennms-dnsresolver-netty" version="${project.version}" description="OpenNMS :: Features :: DNS Resolver :: Netty">
         <feature version="${project.version}">opennms-dnsresolver-api</feature>
-        <feature version="${dnsjavaVersion}">dnsjava</feature>
+        <feature>guava</feature>
+        <feature>dropwizard-metrics</feature>
+        <feature>dnsjava</feature>
         <feature version="${netty4Version}">netty</feature>
+        <feature>resilience4j</feature>
+        <feature>opennms-events-api</feature>
+        <feature>opennms-model</feature>
+
         <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.netty/${project.version}</bundle>
     </feature>
 
-    <feature name="opennms-dnsresolver-unbound4j" version="${project.version}" description="OpenNMS :: Features :: DNS Resolver :: Netty">
-        <feature version="${project.version}">opennms-dnsresolver-api</feature>
-        <bundle>mvn:org.opennms/unbound4j/1.0.0-SNAPSHOT</bundle>
-        <bundle>mvn:org.opennms.features.dnsresolver/org.opennms.features.dnsresolver.unbound4j/${project.version}</bundle>
+    <feature name="resilience4j" version="${resilience4jVersion}" description="resilience4j">
+        <bundle>mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.jsr305/3.0.2_1</bundle>
+        <bundle>mvn:io.vavr/vavr/0.10.0</bundle>
+        <bundle>mvn:io.vavr/vavr-match/0.10.0</bundle>
+        <bundle>mvn:io.github.resilience4j/resilience4j-core/${resilience4jVersion}</bundle>
+        <bundle>mvn:io.github.resilience4j/resilience4j-circuitbreaker/${resilience4jVersion}</bundle>
     </feature>
 
     <feature name="netty" version="${netty4Version}" description="Netty">
