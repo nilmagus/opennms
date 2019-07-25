@@ -105,8 +105,6 @@ public class ParserBase {
 
     private final Timer recordEnrichmentTimer;
 
-    private final Timer dnsLookupTimer;
-
     private int threads = DEFAULT_NUM_THREADS;
 
     private long maxClockSkew = 0;
@@ -134,7 +132,6 @@ public class ParserBase {
 
         recordsDispatched = metricRegistry.meter(MetricRegistry.name("parsers",  name, "recordsDispatched"));
         recordEnrichmentTimer = metricRegistry.timer(MetricRegistry.name("parsers",  name, "recordEnrichment"));
-        dnsLookupTimer = metricRegistry.timer(MetricRegistry.name("parsers",  name, "dnsLookup"));
 
         // Call setters since these also perform additional handling
         setClockSkewEventRate(DEFAULT_CLOCK_SKEW_EVENT_RATE_SECONDS);
@@ -213,7 +210,7 @@ public class ParserBase {
                 final CompletableFuture<TelemetryMessage> future = new CompletableFuture<>();
                 final Timer.Context timerContext = recordEnrichmentTimer.time();
                 // Trigger record enrichment (performing DNS reverse lookups for example)
-                final RecordEnricher recordEnricher = new RecordEnricher(dnsResolver, dnsLookupTimer);
+                final RecordEnricher recordEnricher = new RecordEnricher(dnsResolver);
                 recordEnricher.enrich(record).whenComplete((enrichment, ex) -> {
                     timerContext.close();
                     if (ex != null) {

@@ -50,8 +50,6 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Head
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Packet;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Record;
 
-import com.codahale.metrics.Timer;
-
 public class RecordEnricherTest {
 
     @Test
@@ -68,7 +66,7 @@ public class RecordEnricherTest {
         DnsResolver dnsResolver = mock(DnsResolver.class);
         when(dnsResolver.reverseLookup(any())).thenReturn(reverseLookupFuture);
 
-        RecordEnricher enricher = new RecordEnricher(dnsResolver, new Timer());
+        RecordEnricher enricher = new RecordEnricher(dnsResolver);
 
         final Packet packet = getSamplePacket();
         final List<CompletableFuture<RecordEnrichment>> enrichmentFutures = packet.getRecords().map(enricher::enrich)

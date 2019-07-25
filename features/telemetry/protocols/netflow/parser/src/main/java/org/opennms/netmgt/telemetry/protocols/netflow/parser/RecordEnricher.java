@@ -31,15 +31,12 @@ package org.opennms.netmgt.telemetry.protocols.netflow.parser;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
-import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.dnsresolver.api.DnsResolver;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.Value;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.BooleanValue;
@@ -58,18 +55,15 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.UnsignedV
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Timer;
 import com.google.common.collect.Sets;
 
 public class RecordEnricher {
     private static final Logger LOG = LoggerFactory.getLogger(RecordEnricher.class);
 
     private final DnsResolver dnsResolver;
-    private final Timer lookupTimer;
 
-    public RecordEnricher(DnsResolver dnsResolver, Timer lookupTimer) {
+    public RecordEnricher(DnsResolver dnsResolver) {
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
-        this.lookupTimer = Objects.requireNonNull(lookupTimer);
     }
 
     public CompletableFuture<RecordEnrichment> enrich(Iterable<Value<?>> record) {
@@ -82,9 +76,7 @@ public class RecordEnricher {
         final CompletableFuture reverseLookupFutures[] = addressesToReverseLookup.stream()
                 .map(addr -> {
                     LOG.trace("Issuing reverse lookup for: {}", addr);
-                    final Timer.Context ctx = lookupTimer.time();
                     return dnsResolver.reverseLookup(addr).whenComplete((hostname, ex) -> {
-                        ctx.stop();
                         if (ex == null) {
                             LOG.trace("Got reverse lookup answer for '{}': {}", addr, hostname);
                             synchronized (hostnamesByAddress) {
