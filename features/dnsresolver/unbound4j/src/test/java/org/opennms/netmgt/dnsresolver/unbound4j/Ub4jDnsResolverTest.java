@@ -53,6 +53,7 @@ import org.opennms.core.utils.InetAddressUtils;
 
 import com.google.common.base.Stopwatch;
 
+
 public class Ub4jDnsResolverTest {
 
     private Ub4jDnsResolver dnsResolver;
@@ -69,6 +70,7 @@ public class Ub4jDnsResolverTest {
     }
 
     @Test
+    @Ignore
     public void canDoReverseLookups() throws UnknownHostException, ExecutionException, InterruptedException {
         assertThat(dnsResolver.reverseLookup(InetAddress.getByName("1.1.1.1")).get().get(), equalTo("one.one.one.one"));
         assertThat(dnsResolver.reverseLookup(InetAddress.getByName("173.242.186.51")).get().get(), equalTo("rnd.opennms.ca"));

@@ -48,6 +48,7 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.ipfix.proto.Packet;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.session.Session;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.session.UdpSessionManager;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
@@ -57,8 +58,9 @@ public class IpfixUdpParser extends UdpParserBase implements UdpParser, Dispatch
                           final AsyncDispatcher<TelemetryMessage> dispatcher,
                           final EventForwarder eventForwarder,
                           final Identity identity,
-                          final DnsResolver dnsResolver) {
-        super(Protocol.IPFIX, name, dispatcher, eventForwarder, identity, dnsResolver);
+                          final DnsResolver dnsResolver,
+                          final MetricRegistry metricRegistry) {
+        super(Protocol.IPFIX, name, dispatcher, eventForwarder, identity, dnsResolver, metricRegistry);
     }
 
     @Override

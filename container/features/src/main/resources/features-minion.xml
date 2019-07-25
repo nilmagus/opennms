@@ -129,7 +129,7 @@
 
     <feature name="minion-telemetryd-receivers" description="Minion :: Telemetry :: Receivers" version="${project.version}">
       <feature>netty</feature>
-      <feature>opennms-dnsresolver-netty</feature>
+      <feature>opennms-dnsresolver-api</feature>
       <feature>dropwizard-metrics</feature>
       <bundle>mvn:com.google.protobuf/protobuf-java/${protobufVersion}</bundle>
       <bundle>mvn:org.mongodb/bson/${bsonVersion}</bundle>

@@ -46,6 +46,8 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.RecordProvider;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.session.Session;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.session.UdpSessionManager;
 
+import com.codahale.metrics.MetricRegistry;
+
 public abstract class UdpParserBase extends ParserBase implements UdpParser {
     public final static long HOUSEKEEPING_INTERVAL = 60000;
 
@@ -59,8 +61,9 @@ public abstract class UdpParserBase extends ParserBase implements UdpParser {
                          final AsyncDispatcher<TelemetryMessage> dispatcher,
                          final EventForwarder eventForwarder,
                          final Identity identity,
-                         final DnsResolver dnsResolver) {
-        super(protocol, name, dispatcher, eventForwarder, identity, dnsResolver);
+                         final DnsResolver dnsResolver,
+                         final MetricRegistry metricRegistry) {
+        super(protocol, name, dispatcher, eventForwarder, identity, dnsResolver, metricRegistry);
     }
 
     protected abstract RecordProvider parse(final Session session, final ByteBuffer buffer) throws Exception;

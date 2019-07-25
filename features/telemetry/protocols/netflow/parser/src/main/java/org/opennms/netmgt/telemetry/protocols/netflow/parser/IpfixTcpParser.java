@@ -43,14 +43,17 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow9.proto.Head
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow9.proto.Packet;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.session.TcpSession;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class IpfixTcpParser extends ParserBase implements TcpParser {
 
     public IpfixTcpParser(final String name,
                           final AsyncDispatcher<TelemetryMessage> dispatcher,
                           final EventForwarder eventForwarder,
                           final Identity identity,
-                          final DnsResolver dnsResolver) {
-        super(Protocol.IPFIX, name, dispatcher, eventForwarder, identity, dnsResolver);
+                          final DnsResolver dnsResolver,
+                          final MetricRegistry metricRegistry) {
+        super(Protocol.IPFIX, name, dispatcher, eventForwarder, identity, dnsResolver, metricRegistry);
     }
 
     @Override

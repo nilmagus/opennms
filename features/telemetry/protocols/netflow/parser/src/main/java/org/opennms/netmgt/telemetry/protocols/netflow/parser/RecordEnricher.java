@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.netmgt.dnsresolver.api.DnsResolver;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.Value;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.BooleanValue;
@@ -54,8 +55,13 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.SignedVal
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.StringValue;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.UndeclaredValue;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.UnsignedValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 public class RecordEnricher {
+    private static final Logger LOG = LoggerFactory.getLogger(RecordEnricher.class);
 
     private final DnsResolver dnsResolver;
 
@@ -71,16 +77,25 @@ public class RecordEnricher {
         final Set<InetAddress> addressesToReverseLookup = ipAddressCapturingVisitor.getAddresses();
         final Map<InetAddress, String> hostnamesByAddress = new HashMap<>(addressesToReverseLookup.size());
         final List<CompletableFuture<Optional<String>>> reverseLookupFutures = addressesToReverseLookup.stream()
-                .map(addr -> dnsResolver.reverseLookup(addr).whenComplete((hostname, ex) -> {
-                    if (ex != null) {
-                        synchronized (hostnamesByAddress) {
-                            hostnamesByAddress.put(addr, hostname.orElse(null));
+                .map(addr -> {
+                    LOG.debug("Issuing reverse lookup for: {}", InetAddressUtils.str(addr));
+                    return dnsResolver.reverseLookup(addr).whenComplete((hostname, ex) -> {
+                        if (ex == null) {
+                            LOG.debug("Got reverse lookup answer for '{}': {}", InetAddressUtils.str(addr), hostname);
+                            synchronized (hostnamesByAddress) {
+                                hostnamesByAddress.put(addr, hostname.orElse(null));
+                                LOG.debug("Other lookups pending: {}", Sets.difference(addressesToReverseLookup, hostnamesByAddress.keySet()));
+                            }
+                        } else {
+                            // TODO: Use rate limited logger
+                            LOG.warn("Reverse lookup failed for: {}", addr, ex);
                         }
-                    }
-                })).collect(Collectors.toList());
+                    });
+                }).collect(Collectors.toList());
 
         final CompletableFuture<RecordEnrichment> future = new CompletableFuture<>();
         CompletableFuture.allOf(reverseLookupFutures.toArray(new CompletableFuture[]{})).whenComplete((any, ex) -> {
+            LOG.debug("All reverse lookups complete. Queries: {} Results: {}", addressesToReverseLookup, hostnamesByAddress);
             // All of the reverse lookups have completed, note that some may have failed though
             // Build the enrichment object with the results we do have
             final RecordEnrichment enrichment = new DefaultRecordEnrichment(hostnamesByAddress);

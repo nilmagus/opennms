@@ -48,6 +48,7 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow9.proto.Pack
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.session.Session;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.session.UdpSessionManager;
 
+import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
@@ -56,8 +57,9 @@ public class Netflow9UdpParser extends UdpParserBase implements UdpParser, Dispa
                              final AsyncDispatcher<TelemetryMessage> dispatcher,
                              final EventForwarder eventForwarder,
                              final Identity identity,
-                             final DnsResolver dnsResolver) {
-        super(Protocol.NETFLOW9, name, dispatcher, eventForwarder, identity, dnsResolver);
+                             final DnsResolver dnsResolver,
+                             final MetricRegistry metricRegistry) {
+        super(Protocol.NETFLOW9, name, dispatcher, eventForwarder, identity, dnsResolver, metricRegistry);
     }
 
     @Override

@@ -72,6 +72,9 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.ie.values.UnsignedV
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -98,6 +101,10 @@ public class ParserBase {
 
     private final DnsResolver dnsResolver;
 
+    private final Meter recordsDispatched;
+
+    private final Timer recordEnrichmentTimer;
+
     private int threads = DEFAULT_NUM_THREADS;
 
     private long maxClockSkew = 0;
@@ -113,13 +120,18 @@ public class ParserBase {
                       final AsyncDispatcher<TelemetryMessage> dispatcher,
                       final EventForwarder eventForwarder,
                       final Identity identity,
-                      final DnsResolver dnsResolver) {
+                      final DnsResolver dnsResolver,
+                      final MetricRegistry metricRegistry) {
         this.protocol = Objects.requireNonNull(protocol);
         this.name = Objects.requireNonNull(name);
         this.dispatcher = Objects.requireNonNull(dispatcher);
         this.eventForwarder = Objects.requireNonNull(eventForwarder);
         this.identity = Objects.requireNonNull(identity);
         this.dnsResolver = Objects.requireNonNull(dnsResolver);
+        Objects.requireNonNull(metricRegistry);
+
+        recordsDispatched = metricRegistry.meter(MetricRegistry.name("parsers",  name, "recordsDispatched"));
+        recordEnrichmentTimer = metricRegistry.timer(MetricRegistry.name("parsers",  name, "recordEnrichment"));
 
         // Call setters since these also perform additional handling
         setClockSkewEventRate(DEFAULT_CLOCK_SKEW_EVENT_RATE_SECONDS);
@@ -196,9 +208,11 @@ public class ParserBase {
         final CompletableFuture<CompletableFuture[]> futureOfFutures = CompletableFuture.supplyAsync(()-> {
             return packet.getRecords().map(record -> {
                 final CompletableFuture<TelemetryMessage> future = new CompletableFuture<>();
+                final Timer.Context timerContext = recordEnrichmentTimer.time();
                 // Trigger record enrichment (performing DNS reverse lookups for example)
                 final RecordEnricher recordEnricher = new RecordEnricher(dnsResolver);
                 recordEnricher.enrich(record).whenComplete((enrichment, ex) -> {
+                    timerContext.close();
                     if (ex != null) {
                         // Enrichment failed
                         future.completeExceptionally(ex);
@@ -211,13 +225,18 @@ public class ParserBase {
                     final TelemetryMessage msg = new TelemetryMessage(remoteAddress, buffer);
 
                     // Dispatch
-                    dispatcher.send(msg).whenComplete((b,exx) -> {
-                        if (exx != null) {
-                            future.completeExceptionally(exx);
-                            return;
-                        }
-                        future.complete(b);
-                    });
+                    future.complete(msg);
+                /* TODO: JW: FIXME: Remove me
+                dispatcher.send(msg).whenComplete((b,exx) -> {
+                    if (exx != null) {
+                        future.completeExceptionally(exx);
+                        return;
+                    }
+                    future.complete(b);
+                });
+                */
+
+                    recordsDispatched.mark();
                 });
                 return future;
             }).toArray(CompletableFuture[]::new);
@@ -227,14 +246,14 @@ public class ParserBase {
         final CompletableFuture<Void> future = new CompletableFuture<>();
         futureOfFutures.whenComplete((futures,ex) -> {
             if (ex != null) {
-                // There was an error preparing the records for dispatch
+                LOG.warn("Error preparing records for dispatch.", ex);
                 future.completeExceptionally(ex);
                 return;
             }
             // Dispatch was triggered for all the records, now wait for the dispatching to complete
             CompletableFuture.allOf(futures).whenComplete((any,exx) -> {
                 if (exx != null) {
-                    // One or more of the records were not successfully dispatched
+                    LOG.warn("One or more of the records were not successfully dispatched.", exx);
                     future.completeExceptionally(exx);
                     return;
                 }
@@ -278,6 +297,7 @@ public class ParserBase {
     }
 
     protected void detectClockSkew(final long packetTimestampMs, final InetAddress remoteAddress) {
+        /* JW: TODO Restore
         if (getMaxClockSkew() > 0) {
             long deltaMs = Math.abs(packetTimestampMs - System.currentTimeMillis());
             if (deltaMs > getMaxClockSkew() * 1000L) {
@@ -302,6 +322,7 @@ public class ParserBase {
 
             }
         }
+        */
     }
 
     private static class FlowBuilderVisitor implements Value.Visitor {

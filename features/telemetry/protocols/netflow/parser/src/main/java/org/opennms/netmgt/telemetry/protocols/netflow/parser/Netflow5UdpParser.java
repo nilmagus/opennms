@@ -46,14 +46,17 @@ import org.opennms.netmgt.telemetry.listeners.UdpParser;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Header;
 import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Packet;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class Netflow5UdpParser extends ParserBase implements UdpParser, Dispatchable {
 
     public Netflow5UdpParser(final String name,
                              final AsyncDispatcher<TelemetryMessage> dispatcher,
                              final EventForwarder eventForwarder,
                              final Identity identity,
-                             final DnsResolver dnsResolver) {
-        super(Protocol.NETFLOW5, name, dispatcher, eventForwarder, identity, dnsResolver);
+                             final DnsResolver dnsResolver,
+                             final MetricRegistry metricRegistry) {
+        super(Protocol.NETFLOW5, name, dispatcher, eventForwarder, identity, dnsResolver, metricRegistry);
     }
 
     @Override

@@ -43,6 +43,8 @@ import org.opennms.netmgt.telemetry.api.receiver.TelemetryMessage;
 import org.opennms.netmgt.xml.event.Event;
 import org.opennms.netmgt.xml.event.Log;
 
+import com.codahale.metrics.MetricRegistry;
+
 public class ClockSkewTest {
     private int eventCount = 0;
 
@@ -110,7 +112,7 @@ public class ClockSkewTest {
         public void close() {
 
         }
-    }, eventForwarder, identity, dnsResolver);
+    }, eventForwarder, identity, dnsResolver, new MetricRegistry());
 
     @Before
     public void reset() {

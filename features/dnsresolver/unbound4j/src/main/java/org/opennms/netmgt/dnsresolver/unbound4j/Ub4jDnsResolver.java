@@ -31,6 +31,7 @@ package org.opennms.netmgt.dnsresolver.unbound4j;
 import java.net.InetAddress;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.opennms.netmgt.dnsresolver.api.DnsResolver;
 import org.opennms.unbound4j.api.Unbound4j;
@@ -40,14 +41,35 @@ import org.opennms.unbound4j.impl.Unbound4jImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 public class Ub4jDnsResolver implements DnsResolver {
     private static final Logger LOG = LoggerFactory.getLogger(Ub4jDnsResolver.class);
+
+    private final Cache<InetAddress, Optional<String>> cache = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .maximumSize(100000)
+            .build();
 
     private final Unbound4j ub4j = new Unbound4jImpl();
     private Unbound4jContext ctx;
 
+    private boolean useSystemResolver = true;
+    private String unboundConfig;
+    private int requestTimeoutSeconds;
+
     public void init() {
-        Unbound4jConfig config = Unbound4jConfig.newBuilder().build();
+        final Unbound4jConfig.Builder builder = Unbound4jConfig.newBuilder()
+                .useSystemResolver(useSystemResolver);
+        if (!Strings.isNullOrEmpty(unboundConfig)) {
+            builder.withUnboundConfig(unboundConfig);
+        }
+        if (requestTimeoutSeconds > 0) {
+            builder.withRequestTimeout(requestTimeoutSeconds, TimeUnit.SECONDS);
+        }
+        final Unbound4jConfig config = builder.build();
         ctx = ub4j.newContext(config);
     }
 
@@ -63,7 +85,40 @@ public class Ub4jDnsResolver implements DnsResolver {
     }
 
     @Override
-    public CompletableFuture<Optional<String>> reverseLookup(InetAddress inetAddress) {
-        return ub4j.reverseLookup(ctx, inetAddress);
+    public CompletableFuture<Optional<String>> reverseLookup(InetAddress addr) {
+        Optional<String> hostname = cache.getIfPresent(addr);
+        if (hostname != null) {
+            return CompletableFuture.completedFuture(hostname);
+        }
+        return ub4j.reverseLookup(ctx, addr).whenComplete((hostnameFromDns, ex) -> {
+           if (ex == null) {
+               // Store the result in the cache
+               cache.put(addr, hostnameFromDns);
+           }
+        });
+    }
+
+    public boolean isUseSystemResolver() {
+        return useSystemResolver;
+    }
+
+    public void setUseSystemResolver(boolean useSystemResolver) {
+        this.useSystemResolver = useSystemResolver;
+    }
+
+    public int getRequestTimeoutSeconds() {
+        return requestTimeoutSeconds;
+    }
+
+    public void setRequestTimeoutSeconds(int requestTimeoutSeconds) {
+        this.requestTimeoutSeconds = requestTimeoutSeconds;
+    }
+
+    public String getUnboundConfig() {
+        return unboundConfig;
+    }
+
+    public void setUnboundConfig(String unboundConfig) {
+        this.unboundConfig = unboundConfig;
     }
 }
