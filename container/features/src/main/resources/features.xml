@@ -842,6 +842,8 @@
     </feature>
     <feature name="opennms-provisioning-shell" version="${project.version}" description="OpenNMS :: Provisioning :: Shell">
         <bundle>mvn:org.opennms/opennms-provision-shell/${project.version}</bundle>
+        <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/${httpcoreVersion}</bundle>
+        <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/${httpclientVersion}</bundle>
     </feature>
     <feature name="opennms-vmware" version="${project.version}" description="OpenNMS :: Integrations :: VMware Integration">
         <feature>commons-cli</feature>
@@ -1488,6 +1490,17 @@
         <bundle>mvn:io.netty/netty-transport-native-epoll/${netty4Version}</bundle>
         <bundle>mvn:io.netty/netty-transport-native-unix-common/${netty4Version}</bundle>
         -->
+    </feature>
+
+    <feature name="opennms-kvstore-api" description="OpenNMS :: Features :: Distributed :: Key Value Store :: API" version="${project.version}">
+        <bundle>mvn:org.opennms.features.distributed/org.opennms.features.distributed.kv-store.api/${project.version}</bundle>
+        <bundle>mvn:org.opennms.features.distributed/org.opennms.features.distributed.kv-store.shell/${project.version}</bundle>
+    </feature>
+    
+    <feature name="opennms-kvstore-noop"
+             description="OpenNMS :: Features :: Distributed :: Key Value Store :: No-Op" version="${project.version}">
+        <feature>opennms-kvstore-api</feature>
+        <bundle>mvn:org.opennms.features.distributed/org.opennms.features.distributed.kv-store.no-op/${project.version}</bundle>
     </feature>
 
 </features>
