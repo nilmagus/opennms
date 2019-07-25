@@ -95,9 +95,6 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
     @PostConstruct
     private void init() {
         try {
-            // TODO: Hack
-            System.setProperty("opennms.home", "/opt/sentinel");
-
             ThreshdConfigFactory.init();
             ThresholdingConfigFactory.init();
             // When we are on OpenNMS we will have been wired an event manager and can listen for events
@@ -110,6 +107,9 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
     // OSGi init entry point
     public void initOsgi() {
         try {
+            // TODO: Hack
+            System.setProperty("opennms.home", "/opt/sentinel");
+
             ThreshdConfigFactory.init();
             ThresholdingConfigFactory.init();
             // TODO: call this on a timer

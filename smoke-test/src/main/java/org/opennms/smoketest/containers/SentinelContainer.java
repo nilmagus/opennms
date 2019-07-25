@@ -194,12 +194,11 @@ public class SentinelContainer extends GenericContainer implements KarafContaine
             featuresOnBoot.add("sentinel-newts");
         }
         if (model.isTelemetryProcessingEnabled()) {
-            featuresOnBoot.add("opennms-thresholding-service");
             featuresOnBoot.add("sentinel-flows");
             featuresOnBoot.add("sentinel-telemetry-jti");
             featuresOnBoot.add("sentinel-telemetry-nxos");
         }
-        
+
         switch (model.getKeyValueStoreStrategy()) {
             case NOOP:
                 featuresOnBoot.add("sentinel-kvstore-noop");

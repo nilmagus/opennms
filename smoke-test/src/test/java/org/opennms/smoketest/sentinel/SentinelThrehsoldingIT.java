@@ -28,16 +28,12 @@
 
 package org.opennms.smoketest.sentinel;
 
-import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermissions;
-
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.opennms.smoketest.stacks.IpcStrategy;
 import org.opennms.smoketest.stacks.KeyValueStoreStrategy;
 import org.opennms.smoketest.stacks.OpenNMSStack;
-import org.opennms.smoketest.stacks.SentinelProfile;
 import org.opennms.smoketest.stacks.StackModel;
 import org.opennms.smoketest.utils.KarafShell;
 
@@ -46,14 +42,7 @@ public class SentinelThrehsoldingIT {
     @ClassRule
     public static final OpenNMSStack stack = OpenNMSStack.withModel(StackModel.newBuilder()
             .withMinion()
-            .withSentinels(SentinelProfile.newBuilder()
-//                    .withFile("thresholding/poller-configuration.xml", "etc/poller-configuration.xml")
-//                    .withFile(Paths.get(SentinelThrehsoldingIT.class.getResource("thresholding/collectd-configuration.xml").toString()), "etc/collectd-configuration.xml")
-//                    .withFile(Paths.get(SentinelThrehsoldingIT.class.getResource("thresholding/jdbc-datacollection-config.xml").toString()), "etc/jdbc-datacollection-config.xml")
-//                    .withFile(Paths.get(SentinelThrehsoldingIT.class.getResource("thresholding/resource-types.d/metadata.xml").toString()), "etc/resource-types.d/metadata.xml")
-//                    .withFile("thresholding/threshd-configuration.xml", "../opennms/etc/threshd-configuration.xml")
-//                    .withFile("thresholding/thresholds.xml", "../opennms/etc/thresholds.xml")
-                    .build())
+            .withSentinel()
             .withTelemetryProcessing()
             .withKeyValueStoreStrategy(KeyValueStoreStrategy.NEWTS_CASSANDRA)
             .withIpcStrategy(IpcStrategy.KAFKA)
@@ -62,6 +51,5 @@ public class SentinelThrehsoldingIT {
     @Test
     public void canThreshold() {
         KarafShell ks = new KarafShell(stack.sentinel().getSshAddress());
-        ks.runCommand("feature:install opennms-thresholding-service");
     }
 }
