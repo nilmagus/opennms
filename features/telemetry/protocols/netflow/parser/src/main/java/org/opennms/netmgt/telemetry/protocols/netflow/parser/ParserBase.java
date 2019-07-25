@@ -225,16 +225,13 @@ public class ParserBase {
                     final TelemetryMessage msg = new TelemetryMessage(remoteAddress, buffer);
 
                     // Dispatch
-                    future.complete(msg);
-                /* TODO: JW: FIXME: Remove me
-                dispatcher.send(msg).whenComplete((b,exx) -> {
-                    if (exx != null) {
-                        future.completeExceptionally(exx);
-                        return;
-                    }
-                    future.complete(b);
-                });
-                */
+                    dispatcher.send(msg).whenComplete((b,exx) -> {
+                        if (exx != null) {
+                            future.completeExceptionally(exx);
+                            return;
+                        }
+                        future.complete(b);
+                    });
 
                     recordsDispatched.mark();
                 });
