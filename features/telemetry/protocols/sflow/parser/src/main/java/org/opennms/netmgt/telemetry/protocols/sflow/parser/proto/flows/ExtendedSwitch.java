@@ -76,7 +76,7 @@ public class ExtendedSwitch implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("src_vlan", this.src_vlan);
         bsonWriter.writeInt64("src_priority", this.src_priority);

@@ -52,23 +52,26 @@ import org.opennms.netmgt.telemetry.protocols.netflow.parser.netflow5.proto.Reco
 
 public class RecordEnricherTest {
 
+    /**
+     * Test flow enrichment by mocking the {@link DnsResolver}.
+     */
     @Test
-    public void canDoItAgain() throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
-        testIt(CompletableFuture.completedFuture(Optional.of("test")), Optional.of("test"));
-        testIt(CompletableFuture.completedFuture(Optional.empty()), Optional.empty());
+    public void canEnrichFlow() throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
+        enrichFlow(CompletableFuture.completedFuture(Optional.of("test")), Optional.of("test"));
+        enrichFlow(CompletableFuture.completedFuture(Optional.empty()), Optional.empty());
 
         CompletableFuture exceptionalFuture = new CompletableFuture();
         exceptionalFuture.completeExceptionally(new RuntimeException());
-        testIt(exceptionalFuture, Optional.empty());
+        enrichFlow(exceptionalFuture, Optional.empty());
     }
 
-    private void testIt(CompletableFuture reverseLookupFuture, Optional<String> expectedValue) throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
+    private void enrichFlow(CompletableFuture reverseLookupFuture, Optional<String> expectedValue) throws InvalidPacketException, ExecutionException, InterruptedException, UnknownHostException {
         DnsResolver dnsResolver = mock(DnsResolver.class);
         when(dnsResolver.reverseLookup(any())).thenReturn(reverseLookupFuture);
 
         RecordEnricher enricher = new RecordEnricher(dnsResolver);
 
-        final Packet packet = getSamplePacket();
+        final Packet packet = getSampleNf5Packet();
         final List<CompletableFuture<RecordEnrichment>> enrichmentFutures = packet.getRecords().map(enricher::enrich)
                 .collect(Collectors.toList());
 
@@ -83,8 +86,8 @@ public class RecordEnricherTest {
         }
     }
 
-    private static Packet getSamplePacket() throws InvalidPacketException {
-        // Generate minimal netflow packet with 1 netflow record but maximum values (theoretical values only)
+    private static Packet getSampleNf5Packet() throws InvalidPacketException {
+        // Generate minimal Netflow v5 packet with 1 record
         byte[] bytes = new byte[Header.SIZE + Record.SIZE];
         Arrays.fill(bytes, (byte) 0xFF);
         bytes[0] = 0x00;

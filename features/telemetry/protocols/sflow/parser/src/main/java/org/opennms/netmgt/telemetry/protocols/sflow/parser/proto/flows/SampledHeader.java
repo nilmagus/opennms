@@ -151,7 +151,7 @@ public class SampledHeader implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("protocol");
         this.protocol.writeBson(bsonWriter);
@@ -160,17 +160,17 @@ public class SampledHeader implements FlowData {
 
         if (this.ethernetHeader != null) {
             bsonWriter.writeName("ethernet");
-            this.ethernetHeader.writeBson(bsonWriter, svcs);
+            this.ethernetHeader.writeBson(bsonWriter, enr);
         }
 
         if (this.inet4Header != null) {
             bsonWriter.writeName("ipv4");
-            this.inet4Header.writeBson(bsonWriter, svcs);
+            this.inet4Header.writeBson(bsonWriter, enr);
         }
 
         if (this.inet6Header != null) {
             bsonWriter.writeName("ipv6");
-            this.inet6Header.writeBson(bsonWriter, svcs);
+            this.inet6Header.writeBson(bsonWriter, enr);
         }
 
         if (this.rawHeader != null) {

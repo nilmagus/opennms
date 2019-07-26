@@ -196,7 +196,7 @@ public class HwTables implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("host_entries", this.host_entries);
         bsonWriter.writeInt64("host_entries_max", this.host_entries_max);

@@ -84,7 +84,7 @@ public class VirtNetIo implements CounterData {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("rx_bytes", this.rx_bytes.longValue());
         bsonWriter.writeInt64("rx_packets", this.rx_packets);

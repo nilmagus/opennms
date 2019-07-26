@@ -84,7 +84,7 @@ public class VirtDiskIo implements CounterData {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("capacity", this.capacity.longValue());
         bsonWriter.writeInt64("allocation", this.allocation.longValue());

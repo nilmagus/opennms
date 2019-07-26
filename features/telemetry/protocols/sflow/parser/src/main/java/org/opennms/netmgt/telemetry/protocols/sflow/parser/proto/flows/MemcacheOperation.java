@@ -83,18 +83,18 @@ public class MemcacheOperation implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("protocol");
-        this.protocol.writeBson(bsonWriter, svcs);
+        this.protocol.writeBson(bsonWriter, enr);
         bsonWriter.writeName("cmd");
-        this.cmd.writeBson(bsonWriter, svcs);
+        this.cmd.writeBson(bsonWriter, enr);
         bsonWriter.writeString("key", this.key.value);
         bsonWriter.writeInt64("nkeys", this.nkeys);
         bsonWriter.writeInt64("value_bytes", this.value_bytes);
         bsonWriter.writeInt64("uS", this.uS);
         bsonWriter.writeName("status");
-        this.status.writeBson(bsonWriter, svcs);
+        this.status.writeBson(bsonWriter, enr);
         bsonWriter.writeEndDocument();
     }
 }

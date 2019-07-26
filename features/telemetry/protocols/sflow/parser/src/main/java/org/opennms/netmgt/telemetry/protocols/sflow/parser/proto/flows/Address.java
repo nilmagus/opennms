@@ -82,17 +82,17 @@ public class Address {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
 
         switch (this.type) {
             case IP_V4:
                 bsonWriter.writeName("ipv4");
-                this.ipV4.writeBson(bsonWriter, svcs);
+                this.ipV4.writeBson(bsonWriter, enr);
                 break;
             case IP_V6:
                 bsonWriter.writeName("ipv6");
-                this.ipV6.writeBson(bsonWriter, svcs);
+                this.ipV6.writeBson(bsonWriter, enr);
                 break;
             default:
                 throw new IllegalStateException();

@@ -33,6 +33,6 @@ import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramEnrichm
 import org.opennms.netmgt.telemetry.protocols.sflow.parser.SampleDatagramVisitor;
 
 public interface FlowData {
-    void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs);
+    void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr);
     void visit(final SampleDatagramVisitor visitor);
 }

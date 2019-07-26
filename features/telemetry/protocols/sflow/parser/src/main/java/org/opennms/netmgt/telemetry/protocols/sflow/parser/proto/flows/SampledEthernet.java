@@ -71,13 +71,13 @@ public class SampledEthernet implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("length", this.length);
         bsonWriter.writeName("src_mac");
-        this.src_mac.writeBson(bsonWriter, svcs);
+        this.src_mac.writeBson(bsonWriter, enr);
         bsonWriter.writeName("dst_mac");
-        this.dst_mac.writeBson(bsonWriter, svcs);
+        this.dst_mac.writeBson(bsonWriter, enr);
         bsonWriter.writeInt64("type", this.type);
         bsonWriter.writeEndDocument();
     }

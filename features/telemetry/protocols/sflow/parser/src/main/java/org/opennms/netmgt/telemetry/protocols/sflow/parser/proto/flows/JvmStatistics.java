@@ -139,7 +139,7 @@ public class JvmStatistics implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("heap_initial", this.heap_initial.longValue());
         bsonWriter.writeInt64("heap_used", this.heap_used.longValue());

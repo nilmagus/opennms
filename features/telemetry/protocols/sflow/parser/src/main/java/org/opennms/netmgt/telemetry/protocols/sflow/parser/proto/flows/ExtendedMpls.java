@@ -64,14 +64,14 @@ public class ExtendedMpls implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("nexthop");
-        this.nexthop.writeBson(bsonWriter, svcs);
+        this.nexthop.writeBson(bsonWriter, enr);
         bsonWriter.writeName("in_stack");
-        this.in_stack.writeBson(bsonWriter, svcs);
+        this.in_stack.writeBson(bsonWriter, enr);
         bsonWriter.writeName("out_stack");
-        this.out_stack.writeBson(bsonWriter, svcs);
+        this.out_stack.writeBson(bsonWriter, enr);
         bsonWriter.writeEndDocument();
     }
 

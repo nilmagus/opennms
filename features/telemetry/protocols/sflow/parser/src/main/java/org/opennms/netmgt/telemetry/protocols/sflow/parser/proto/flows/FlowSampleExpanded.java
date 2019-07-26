@@ -109,22 +109,22 @@ public class FlowSampleExpanded implements SampleData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("sequence_number", this.sequence_number);
         bsonWriter.writeName("source_id");
-        this.source_id.writeBson(bsonWriter, svcs);
+        this.source_id.writeBson(bsonWriter, enr);
         bsonWriter.writeInt64("sampling_rate", this.sampling_rate);
         bsonWriter.writeInt64("sample_pool", this.sample_pool);
         bsonWriter.writeInt64("drops", this.drops);
         bsonWriter.writeName("input");
-        this.input.writeBson(bsonWriter, svcs);
+        this.input.writeBson(bsonWriter, enr);
         bsonWriter.writeName("output");
-        this.output.writeBson(bsonWriter, svcs);
+        this.output.writeBson(bsonWriter, enr);
         bsonWriter.writeStartDocument("flows");
         for (final FlowRecord flowRecord : this.flow_records) {
             bsonWriter.writeName(flowRecord.dataFormat.toId());
-            flowRecord.writeBson(bsonWriter, svcs);
+            flowRecord.writeBson(bsonWriter, enr);
         }
         bsonWriter.writeEndDocument();
         bsonWriter.writeEndDocument();

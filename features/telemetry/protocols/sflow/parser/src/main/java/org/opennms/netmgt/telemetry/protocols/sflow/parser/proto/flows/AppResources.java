@@ -87,7 +87,7 @@ public class AppResources implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("user_time", this.user_time);
         bsonWriter.writeInt64("system_time", this.system_time);

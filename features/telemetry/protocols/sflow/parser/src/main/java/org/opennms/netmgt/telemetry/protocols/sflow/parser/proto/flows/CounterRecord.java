@@ -92,9 +92,9 @@ public class CounterRecord extends Record<CounterData> {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         if (data.value != null) {
-            this.data.value.writeBson(bsonWriter, svcs);
+            this.data.value.writeBson(bsonWriter, enr);
         } else {
             bsonWriter.writeNull();
         }

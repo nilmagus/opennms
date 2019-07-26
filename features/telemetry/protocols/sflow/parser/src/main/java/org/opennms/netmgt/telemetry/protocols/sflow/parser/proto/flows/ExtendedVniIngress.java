@@ -57,7 +57,7 @@ public class ExtendedVniIngress implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeInt64(this.vni);
     }
 

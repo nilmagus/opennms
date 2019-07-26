@@ -73,10 +73,10 @@ public class ExtendedRouter implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("nexthop");
-        this.nexthop.writeBson(bsonWriter, svcs);
+        this.nexthop.writeBson(bsonWriter, enr);
         bsonWriter.writeInt64("src_mask_len", this.src_mask_len);
         bsonWriter.writeInt64("dst_mask_len", this.dst_mask_len);
         bsonWriter.writeEndDocument();

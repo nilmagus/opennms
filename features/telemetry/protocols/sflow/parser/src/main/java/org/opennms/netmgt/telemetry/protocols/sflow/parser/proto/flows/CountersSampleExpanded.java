@@ -76,17 +76,17 @@ public class CountersSampleExpanded implements SampleData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("sequence_number", this.sequence_number);
 
         bsonWriter.writeName("source_id");
-        this.source_id.writeBson(bsonWriter, svcs);
+        this.source_id.writeBson(bsonWriter, enr);
 
         bsonWriter.writeStartDocument("counters");
         for (final CounterRecord counterRecord : this.counters) {
             bsonWriter.writeName(counterRecord.dataFormat.toId());
-            counterRecord.writeBson(bsonWriter, svcs);
+            counterRecord.writeBson(bsonWriter, enr);
         }
         bsonWriter.writeEndDocument();
 

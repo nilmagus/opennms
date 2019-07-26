@@ -56,8 +56,8 @@ public class AppParentContent implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
-        this.context.writeBson(bsonWriter, svcs);
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
+        this.context.writeBson(bsonWriter, enr);
     }
 
     @Override

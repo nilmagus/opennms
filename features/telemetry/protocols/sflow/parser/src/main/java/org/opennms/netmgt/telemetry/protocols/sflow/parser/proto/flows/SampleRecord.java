@@ -58,14 +58,14 @@ public class SampleRecord extends Record<SampleData> {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
 
         bsonWriter.writeString("format", this.dataFormat.toId());
 
         if (data.value != null) {
             bsonWriter.writeName("data");
-            this.data.value.writeBson(bsonWriter, svcs);
+            this.data.value.writeBson(bsonWriter, enr);
         }
 
         bsonWriter.writeEndDocument();

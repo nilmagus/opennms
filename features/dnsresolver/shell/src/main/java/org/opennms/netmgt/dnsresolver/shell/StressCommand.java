@@ -62,7 +62,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
- * Used to stress test DNS lookups.
+ * Used to stress test (reverse) DNS lookups.
  *
  * @author jwhite
  */

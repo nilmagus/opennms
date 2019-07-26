@@ -60,12 +60,12 @@ public class ExtendedNat implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("src_address");
-        this.src_address.writeBson(bsonWriter, svcs);
+        this.src_address.writeBson(bsonWriter, enr);
         bsonWriter.writeName("dst_address");
-        this.dst_address.writeBson(bsonWriter, svcs);
+        this.dst_address.writeBson(bsonWriter, enr);
         bsonWriter.writeEndDocument();
     }
 

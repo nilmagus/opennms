@@ -33,6 +33,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * An infinite iterator that will return random items
+ * from the given list.
+ *
+ * @param <T> the type of elements in the list
+ */
 public class RandomIterator<T> implements Iterable<T> {
     private final List<T> items;
     private final int numItems;

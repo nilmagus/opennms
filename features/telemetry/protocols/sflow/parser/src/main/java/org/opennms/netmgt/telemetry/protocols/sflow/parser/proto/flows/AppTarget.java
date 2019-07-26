@@ -56,8 +56,8 @@ public class AppTarget implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
-        this.actor.writeBson(bsonWriter, svcs);
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
+        this.actor.writeBson(bsonWriter, enr);
     }
 
     @Override

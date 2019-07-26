@@ -120,7 +120,7 @@ public class HostCpu implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeDouble("load_one", this.load_one);
         bsonWriter.writeDouble("load_five", this.load_five);

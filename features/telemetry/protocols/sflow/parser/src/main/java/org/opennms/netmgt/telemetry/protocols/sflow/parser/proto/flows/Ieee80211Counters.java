@@ -132,7 +132,7 @@ public class Ieee80211Counters implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("dot11TransmittedFragmentCount", this.dot11TransmittedFragmentCount);
         bsonWriter.writeInt64("dot11MulticastTransmittedFrameCount", this.dot11MulticastTransmittedFrameCount);

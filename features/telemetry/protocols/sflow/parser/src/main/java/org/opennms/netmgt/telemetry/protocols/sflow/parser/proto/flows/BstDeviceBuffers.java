@@ -60,7 +60,7 @@ public class BstDeviceBuffers implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt32("uc_pc", this.uc_pc);
         bsonWriter.writeInt32("mc_pc", this.mc_pc);

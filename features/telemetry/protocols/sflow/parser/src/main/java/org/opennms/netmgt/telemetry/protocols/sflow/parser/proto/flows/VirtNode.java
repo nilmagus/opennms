@@ -72,7 +72,7 @@ public class VirtNode implements CounterData {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("mhz", this.mhz);
         bsonWriter.writeInt64("cpus", this.cpus);

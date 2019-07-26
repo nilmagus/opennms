@@ -10,6 +10,7 @@
 
     <cm:property-placeholder id="netty-dns-resolver" persistent-id="org.opennms.features.dnsresolver.netty" update-strategy="reload">
         <cm:default-properties>
+            <!-- Defaults to 2 * num cores when the value is <= 0 -->
             <cm:property name="num-contexts" value="0" />
             <cm:property name="nameservers" value="" />
             <cm:property name="query-timeout-millis" value="5000" />

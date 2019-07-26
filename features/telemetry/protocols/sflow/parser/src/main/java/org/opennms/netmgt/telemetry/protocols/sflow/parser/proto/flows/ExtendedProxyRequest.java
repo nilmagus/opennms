@@ -61,7 +61,7 @@ public class ExtendedProxyRequest implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("uri", this.uri.value);
         bsonWriter.writeString("host", this.host.value);

@@ -57,11 +57,11 @@ public class Pdu {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartArray();
 
         for (final FlowRecord flowRecord : this.flow_records) {
-            flowRecord.writeBson(bsonWriter, svcs);
+            flowRecord.writeBson(bsonWriter, enr);
         }
 
         bsonWriter.writeEndArray();

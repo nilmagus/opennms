@@ -100,10 +100,10 @@ public class AppOperations implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("application");
-        this.application.writeBson(bsonWriter, svcs);
+        this.application.writeBson(bsonWriter, enr);
         bsonWriter.writeInt64("success", this.success);
         bsonWriter.writeInt64("other", this.other);
         bsonWriter.writeInt64("timeout", this.timeout);

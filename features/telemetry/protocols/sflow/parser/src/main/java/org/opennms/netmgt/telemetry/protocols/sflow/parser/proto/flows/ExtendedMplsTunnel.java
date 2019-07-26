@@ -66,7 +66,7 @@ public class ExtendedMplsTunnel implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("tunnel_lsp_name", this.tunnel_lsp_name.value);
         bsonWriter.writeInt64("tunnel_id", this.tunnel_id);

@@ -64,12 +64,12 @@ public class HostAdapter {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64(this.ifIndex);
         bsonWriter.writeStartArray("mac_address");
         for (final Mac mac : this.mac_address) {
-            mac.writeBson(bsonWriter, svcs);
+            mac.writeBson(bsonWriter, enr);
         }
         bsonWriter.writeEndArray();
         bsonWriter.writeEndDocument();

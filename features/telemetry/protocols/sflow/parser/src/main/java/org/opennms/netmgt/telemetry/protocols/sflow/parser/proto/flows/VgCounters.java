@@ -108,7 +108,7 @@ public class VgCounters implements CounterData {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("dot12InHighPriorityFrames", this.dot12InHighPriorityFrames);
         bsonWriter.writeInt64("dot12InHighPriorityOctets", this.dot12InHighPriorityOctets.longValue());

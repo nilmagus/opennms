@@ -104,7 +104,7 @@ public class NvidiaGpu implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("device_count", this.device_count);
         bsonWriter.writeInt64("processes", this.processes);

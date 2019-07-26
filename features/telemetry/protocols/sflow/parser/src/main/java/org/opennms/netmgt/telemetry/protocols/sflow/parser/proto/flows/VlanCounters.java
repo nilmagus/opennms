@@ -76,7 +76,7 @@ public class VlanCounters implements CounterData {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("vlan_id", this.vlan_id);
         bsonWriter.writeInt64("octets", this.octets.longValue());

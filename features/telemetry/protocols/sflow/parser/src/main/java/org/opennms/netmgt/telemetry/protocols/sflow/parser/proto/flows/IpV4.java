@@ -65,11 +65,11 @@ public class IpV4 {
         return ip_v4;
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("address", this.ip_v4.getHostAddress());
 
-        svcs.getHostnameFor(this.ip_v4).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
+        enr.getHostnameFor(this.ip_v4).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
         bsonWriter.writeEndDocument();
     }
 

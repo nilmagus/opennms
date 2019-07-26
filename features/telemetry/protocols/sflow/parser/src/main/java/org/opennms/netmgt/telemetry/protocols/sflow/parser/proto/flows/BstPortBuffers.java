@@ -78,7 +78,7 @@ public class BstPortBuffers implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
 
         bsonWriter.writeInt32("ingress_uc_pc", this.ingress_uc_pc);

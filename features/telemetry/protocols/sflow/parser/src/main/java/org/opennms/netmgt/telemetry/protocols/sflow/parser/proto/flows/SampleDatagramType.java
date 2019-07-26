@@ -66,12 +66,12 @@ public class SampleDatagramType {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("version");
-        this.version.writeBson(bsonWriter, svcs);
+        this.version.writeBson(bsonWriter, enr);
         bsonWriter.writeName("datagram");
-        this.datagram.writeBson(bsonWriter, svcs);
+        this.datagram.writeBson(bsonWriter, enr);
         bsonWriter.writeEndDocument();
     }
 

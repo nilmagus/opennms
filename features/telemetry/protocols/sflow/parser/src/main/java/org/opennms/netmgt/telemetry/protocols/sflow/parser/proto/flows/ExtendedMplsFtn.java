@@ -62,7 +62,7 @@ public class ExtendedMplsFtn implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("mplsFTNDescr", this.mplsFTNDescr.value);
         bsonWriter.writeInt64("mplsFTNMask", this.mplsFTNMask);

@@ -63,7 +63,7 @@ public class ExtendedVlantunnel implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartArray();
         for (final UnsignedInteger unsignedInteger : stack) {
             bsonWriter.writeInt64(unsignedInteger.longValue());

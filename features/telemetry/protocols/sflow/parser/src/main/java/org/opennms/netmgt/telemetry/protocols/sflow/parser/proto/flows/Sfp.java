@@ -73,7 +73,7 @@ public class Sfp {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("module_id", this.module_id);
         bsonWriter.writeInt64("module_num_lanes", this.module_num_lanes);
@@ -81,7 +81,7 @@ public class Sfp {
         bsonWriter.writeInt32("module_temperature", this.module_temperature);
         bsonWriter.writeStartArray("lanes");
         for (final Lane lane : lanes) {
-            lane.writeBson(bsonWriter, svcs);
+            lane.writeBson(bsonWriter, enr);
         }
         bsonWriter.writeEndArray();
         bsonWriter.writeEndDocument();

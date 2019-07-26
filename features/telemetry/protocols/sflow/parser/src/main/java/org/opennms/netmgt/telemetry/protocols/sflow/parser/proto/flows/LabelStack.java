@@ -55,7 +55,7 @@ public class LabelStack {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartArray();
         for (final int i : this.label_stack) {
             bsonWriter.writeInt32(i);

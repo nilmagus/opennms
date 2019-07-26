@@ -56,8 +56,8 @@ public class ExtendedIpv6TunnelIngress implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
-        this.header.writeBson(bsonWriter, svcs);
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
+        this.header.writeBson(bsonWriter, enr);
     }
 
     @Override

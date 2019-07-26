@@ -57,8 +57,8 @@ public class NextHop {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
-        this.next_hop.writeBson(bsonWriter, svcs);
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
+        this.next_hop.writeBson(bsonWriter, enr);
     }
 
     public void visit(SampleDatagramVisitor visitor) {

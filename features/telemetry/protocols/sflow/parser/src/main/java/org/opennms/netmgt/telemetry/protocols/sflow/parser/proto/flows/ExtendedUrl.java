@@ -65,10 +65,10 @@ public class ExtendedUrl implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("direction");
-        this.direction.writeBson(bsonWriter, svcs);
+        this.direction.writeBson(bsonWriter, enr);
         bsonWriter.writeString("url", this.url.value);
         bsonWriter.writeString("host", this.host.value);
         bsonWriter.writeEndDocument();

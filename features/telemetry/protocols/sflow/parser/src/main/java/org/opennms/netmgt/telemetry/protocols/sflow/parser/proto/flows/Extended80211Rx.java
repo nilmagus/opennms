@@ -90,14 +90,14 @@ public class Extended80211Rx implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("ssid", this.ssid.value);
 
         bsonWriter.writeName("bssid");
-        this.bssid.writeBson(bsonWriter, svcs);
+        this.bssid.writeBson(bsonWriter, enr);
         bsonWriter.writeName("version");
-        this.version.writeBson(bsonWriter, svcs);
+        this.version.writeBson(bsonWriter, enr);
 
         bsonWriter.writeInt64("channel", this.channel);
         bsonWriter.writeInt64("speed", this.speed.longValue());
@@ -105,7 +105,7 @@ public class Extended80211Rx implements FlowData {
         bsonWriter.writeInt64("rcpi", this.rcpi);
 
         bsonWriter.writeName("packet_duration");
-        this.packet_duration.writeBson(bsonWriter, svcs);
+        this.packet_duration.writeBson(bsonWriter, enr);
         bsonWriter.writeEndDocument();
     }
 

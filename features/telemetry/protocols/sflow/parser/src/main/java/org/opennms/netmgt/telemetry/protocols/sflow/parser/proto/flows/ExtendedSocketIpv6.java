@@ -74,13 +74,13 @@ public class ExtendedSocketIpv6 implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("protocol", this.protocol);
         bsonWriter.writeName("local_ip");
-        this.local_ip.writeBson(bsonWriter, svcs);
+        this.local_ip.writeBson(bsonWriter, enr);
         bsonWriter.writeName("remote_ip");
-        this.remote_ip.writeBson(bsonWriter, svcs);
+        this.remote_ip.writeBson(bsonWriter, enr);
         bsonWriter.writeInt64("local_port", this.local_port);
         bsonWriter.writeInt64("remote_port", this.remote_port);
         bsonWriter.writeEndDocument();

@@ -62,11 +62,11 @@ public class Context {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
-        this.application.writeBson(bsonWriter, svcs);
-        this.operation.writeBson(bsonWriter, svcs);
-        this.attributes.writeBson(bsonWriter, svcs);
+        this.application.writeBson(bsonWriter, enr);
+        this.operation.writeBson(bsonWriter, enr);
+        this.attributes.writeBson(bsonWriter, enr);
         bsonWriter.writeEndDocument();
     }
 }

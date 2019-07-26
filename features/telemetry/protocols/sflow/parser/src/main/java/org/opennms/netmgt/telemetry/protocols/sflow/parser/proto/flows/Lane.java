@@ -91,7 +91,7 @@ public class Lane {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("index", this.index);
         bsonWriter.writeInt64("tx_bias_current", this.tx_bias_current);

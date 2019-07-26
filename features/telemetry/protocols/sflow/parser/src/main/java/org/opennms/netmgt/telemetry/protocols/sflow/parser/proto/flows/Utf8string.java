@@ -55,7 +55,7 @@ public class Utf8string {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeString(new String(this.utf8string.value, StandardCharsets.UTF_8));
     }
 }

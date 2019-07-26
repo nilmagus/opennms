@@ -63,10 +63,10 @@ public class Extended80211Payload implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("ciphersuite");
-        this.ciphersuite.writeBson(bsonWriter, svcs);
+        this.ciphersuite.writeBson(bsonWriter, enr);
         bsonWriter.writeBinaryData("data", new BsonBinary(this.data.value));
         bsonWriter.writeEndDocument();
     }

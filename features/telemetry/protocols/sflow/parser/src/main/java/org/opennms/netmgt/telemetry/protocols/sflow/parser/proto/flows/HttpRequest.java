@@ -109,12 +109,12 @@ public class HttpRequest implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("method");
-        this.method.writeBson(bsonWriter, svcs);
+        this.method.writeBson(bsonWriter, enr);
         bsonWriter.writeName("protocol");
-        this.protocol.writeBson(bsonWriter, svcs);
+        this.protocol.writeBson(bsonWriter, enr);
         bsonWriter.writeString("uri", this.uri.value);
         bsonWriter.writeString("host", this.host.value);
         bsonWriter.writeString("referer", this.referer.value);

@@ -55,8 +55,8 @@ public class SampleDatagram {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
-        this.version.writeBson(bsonWriter, svcs);
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
+        this.version.writeBson(bsonWriter, enr);
     }
 
     public void visit(SampleDatagramVisitor visitor) {

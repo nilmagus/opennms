@@ -66,7 +66,7 @@ public class ExtendedMplsVc implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("vc_instance_name", this.vc_instance_name.value);
         bsonWriter.writeInt64("vll_vc_id", this.vll_vc_id);

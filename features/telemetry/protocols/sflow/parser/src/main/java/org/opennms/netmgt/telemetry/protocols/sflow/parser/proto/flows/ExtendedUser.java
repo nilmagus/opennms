@@ -71,14 +71,14 @@ public class ExtendedUser implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("src_charset");
-        this.src_charset.writeBson(bsonWriter, svcs);
+        this.src_charset.writeBson(bsonWriter, enr);
         bsonWriter.writeName("src_user");
         bsonWriter.writeBinaryData(new BsonBinary(this.src_user.value));
         bsonWriter.writeName("dst_charset");
-        this.dst_charset.writeBson(bsonWriter, svcs);
+        this.dst_charset.writeBson(bsonWriter, enr);
         bsonWriter.writeName("dst_user");
         bsonWriter.writeBinaryData(new BsonBinary(this.dst_user.value));
         bsonWriter.writeEndDocument();

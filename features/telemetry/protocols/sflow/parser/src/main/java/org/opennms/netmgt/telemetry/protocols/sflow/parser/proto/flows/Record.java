@@ -137,7 +137,7 @@ public abstract class Record<T> {
                 .toString();
     }
 
-    public abstract void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs);
+    public abstract void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr);
     public abstract void visit(SampleDatagramVisitor visitor);
 
 }

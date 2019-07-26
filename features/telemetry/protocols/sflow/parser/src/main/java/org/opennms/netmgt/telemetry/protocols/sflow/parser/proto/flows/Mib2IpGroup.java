@@ -128,7 +128,7 @@ public class Mib2IpGroup implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("ipForwarding", this.ipForwarding);
         bsonWriter.writeInt64("ipDefaultTTL", this.ipDefaultTTL);

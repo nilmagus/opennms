@@ -73,14 +73,14 @@ public class Processor implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeName("cpu_5s");
-        this.cpu_5s.writeBson(bsonWriter, svcs);
+        this.cpu_5s.writeBson(bsonWriter, enr);
         bsonWriter.writeName("cpu_1m");
-        this.cpu_1m.writeBson(bsonWriter, svcs);
+        this.cpu_1m.writeBson(bsonWriter, enr);
         bsonWriter.writeName("cpu_5m");
-        this.cpu_5m.writeBson(bsonWriter, svcs);
+        this.cpu_5m.writeBson(bsonWriter, enr);
         bsonWriter.writeInt64("total_memory", this.total_memory.longValue());
         bsonWriter.writeInt64("free_memory", this.free_memory.longValue());
         bsonWriter.writeEndDocument();

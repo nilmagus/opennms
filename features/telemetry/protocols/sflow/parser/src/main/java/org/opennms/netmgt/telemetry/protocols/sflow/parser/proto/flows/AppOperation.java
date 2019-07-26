@@ -81,15 +81,15 @@ public class AppOperation implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
 
         bsonWriter.writeName("context");
-        this.context.writeBson(bsonWriter, svcs);
+        this.context.writeBson(bsonWriter, enr);
 
         bsonWriter.writeStartArray("status_descr");
         for (final Utf8string utf8string : this.status_descr) {
-            utf8string.writeBson(bsonWriter, svcs);
+            utf8string.writeBson(bsonWriter, enr);
         }
         bsonWriter.writeEndArray();
 
@@ -100,7 +100,7 @@ public class AppOperation implements FlowData {
         bsonWriter.writeInt64("uS", this.uS);
 
         bsonWriter.writeName("status");
-        this.status.writeBson(bsonWriter, svcs);
+        this.status.writeBson(bsonWriter, enr);
 
         bsonWriter.writeEndDocument();
     }

@@ -65,7 +65,7 @@ public class RadioUtilization implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("elapsed_time", this.elapsed_time);
         bsonWriter.writeInt64("on_channel_time", this.on_channel_time);

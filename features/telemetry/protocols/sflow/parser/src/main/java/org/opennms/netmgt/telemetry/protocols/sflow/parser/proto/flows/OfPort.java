@@ -61,7 +61,7 @@ public class OfPort implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("datapath_id", this.datapath_id.longValue());
         bsonWriter.writeInt64("port_no", this.port_no);

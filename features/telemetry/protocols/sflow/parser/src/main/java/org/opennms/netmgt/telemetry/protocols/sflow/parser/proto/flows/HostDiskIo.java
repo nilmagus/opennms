@@ -89,12 +89,12 @@ public class HostDiskIo implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("disk_total", this.disk_total.longValue());
         bsonWriter.writeInt64("disk_free", this.disk_free.longValue());
         bsonWriter.writeName("part_max_used");
-        this.part_max_used.writeBson(bsonWriter, svcs);
+        this.part_max_used.writeBson(bsonWriter, enr);
         bsonWriter.writeInt64("reads", this.reads);
         bsonWriter.writeInt64("bytes_read", this.bytes_read.longValue());
         bsonWriter.writeInt64("read_time", this.read_time);

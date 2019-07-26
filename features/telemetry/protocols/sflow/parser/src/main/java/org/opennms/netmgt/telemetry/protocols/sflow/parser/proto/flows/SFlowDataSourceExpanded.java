@@ -59,7 +59,7 @@ public class SFlowDataSourceExpanded {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("source_id_type", this.source_id_type);
         bsonWriter.writeInt64("source_id_index", this.source_id_index);

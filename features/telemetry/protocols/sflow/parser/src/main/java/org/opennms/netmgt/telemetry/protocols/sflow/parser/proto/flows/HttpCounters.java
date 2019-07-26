@@ -112,7 +112,7 @@ public class HttpCounters implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("method_option_count", this.method_option_count);
         bsonWriter.writeInt64("method_get_count", this.method_get_count);

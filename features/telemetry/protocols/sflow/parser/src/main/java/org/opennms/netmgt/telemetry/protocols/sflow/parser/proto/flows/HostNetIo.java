@@ -85,7 +85,7 @@ public class HostNetIo implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("bytes_in", this.bytes_in.longValue());
         bsonWriter.writeInt64("pkts_in", this.pkts_in);

@@ -54,10 +54,10 @@ public class Attributes {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartArray();
         for (final Utf8string utf8string : this.attributes) {
-            utf8string.writeBson(bsonWriter, svcs);
+            utf8string.writeBson(bsonWriter, enr);
         }
         bsonWriter.writeEndArray();
     }

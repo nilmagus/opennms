@@ -66,9 +66,8 @@ import io.netty.util.internal.SocketUtils;
 /**
  * Asynchronous DNS resolution using Netty.
  *
- * Creates multiple resolvers (aka contexts) against which the queries
- * are randomized in order to improve performance. By default we create 2 * num cores
- * contexts.
+ * Creates multiple resolvers (aka contexts) (defaults to 2*num cores) against which the queries
+ * are randomized in order to improve performance.
  *
  * Uses a circuit breaker in order to ensure that callers do not continue to be bogged down
  * if resolution fails.
@@ -120,9 +119,10 @@ public class NettyDnsResolver implements DnsResolver {
         }
         iterator = new RandomIterator<>(contexts).iterator();
 
-        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+        // Configure this statically for now, we can expose this as needed
+        final CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
                 .failureRateThreshold(80)
-                .waitDurationInOpenState(Duration.ofSeconds(30))
+                .waitDurationInOpenState(Duration.ofSeconds(15))
                 .ringBufferSizeInHalfOpenState(10)
                 .ringBufferSizeInClosedState(100)
                 .recordExceptions(DnsNameResolverTimeoutException.class)

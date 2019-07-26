@@ -152,7 +152,7 @@ public class Mib2IcmpGroup implements CounterData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("icmpInMsgs", this.icmpInMsgs);
         bsonWriter.writeInt64("icmpInErrors", this.icmpInErrors);

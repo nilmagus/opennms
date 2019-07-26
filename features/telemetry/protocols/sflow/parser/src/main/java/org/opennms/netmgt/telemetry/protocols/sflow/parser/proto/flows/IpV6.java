@@ -65,10 +65,10 @@ public class IpV6 {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeString("address", this.ip_v6.getHostAddress());
-        svcs.getHostnameFor(this.ip_v6).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
+        enr.getHostnameFor(this.ip_v6).ifPresent((hostname) -> bsonWriter.writeString("hostname", hostname));
         bsonWriter.writeEndDocument();
     }
 

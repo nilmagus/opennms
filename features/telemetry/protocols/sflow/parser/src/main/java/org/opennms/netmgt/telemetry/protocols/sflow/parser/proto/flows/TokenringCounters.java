@@ -123,7 +123,7 @@ public class TokenringCounters implements CounterData {
                 .toString();
     }
 
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt64("dot5StatsLineErrors", this.dot5StatsLineErrors);
         bsonWriter.writeInt64("dot5StatsBurstErrors", this.dot5StatsBurstErrors);

@@ -98,16 +98,16 @@ public class SampledIpv4 implements FlowData {
     }
 
     @Override
-    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment svcs) {
+    public void writeBson(final BsonWriter bsonWriter, final SampleDatagramEnrichment enr) {
         bsonWriter.writeStartDocument();
         bsonWriter.writeInt32("length", (int) this.length);
         bsonWriter.writeInt32("protocol", (int) this.protocol);
 
         bsonWriter.writeName("src_ip");
-        this.src_ip.writeBson(bsonWriter, svcs);
+        this.src_ip.writeBson(bsonWriter, enr);
 
         bsonWriter.writeName("dst_ip");
-        this.dst_ip.writeBson(bsonWriter, svcs);
+        this.dst_ip.writeBson(bsonWriter, enr);
 
         bsonWriter.writeInt32("src_port", (int) this.src_port);
         bsonWriter.writeInt32("dst_port", (int) this.dst_port);
