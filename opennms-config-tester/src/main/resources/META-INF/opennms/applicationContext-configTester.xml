@@ -466,15 +466,15 @@
     <property name="configResource" value="file:${opennms.home}/etc/telemetryd-configuration.xml" />
   </bean>
 
-  <bean id="threshdConfigFactory-init" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="staticMethod"><value>org.opennms.netmgt.config.ThreshdConfigFactory.init</value></property>
-  </bean>
+  <!--<bean id="threshdConfigFactory-init" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">-->
+    <!--<property name="staticMethod"><value>org.opennms.netmgt.config.ThreshdConfigFactory.init</value></property>-->
+  <!--</bean>-->
 
-  <bean id="threshdConfigFactory" class="org.opennms.netmgt.config.ThreshdConfigFactory" depends-on="threshdConfigFactory-init" factory-method="getInstance"/>
-  
-  <bean id="thresholdingConfigFactory-init" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-    <property name="staticMethod"><value>org.opennms.netmgt.config.ThresholdingConfigFactory.init</value></property>
-  </bean>
+  <!--<bean id="threshdConfigFactory" class="org.opennms.netmgt.config.ThreshdConfigFactory" depends-on="threshdConfigFactory-init" factory-method="getInstance"/>-->
+  <!---->
+  <!--<bean id="thresholdingConfigFactory-init" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">-->
+    <!--<property name="staticMethod"><value>org.opennms.netmgt.config.ThresholdingConfigFactory.init</value></property>-->
+  <!--</bean>-->
 
   <bean id="thresholdingConfigFactory" class="org.opennms.netmgt.config.ThresholdingConfigFactory" depends-on="thresholdingConfigFactory-init" factory-method="getInstance"/>
 

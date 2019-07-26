@@ -59,8 +59,8 @@ import org.opennms.core.test.db.annotations.JUnitTemporaryDatabase;
 import org.opennms.core.utils.InetAddressUtils;
 import org.opennms.core.xml.JaxbUtils;
 import org.opennms.netmgt.collection.test.api.CollectorTestUtils;
-import org.opennms.netmgt.config.ThreshdConfigFactory;
 import org.opennms.netmgt.config.ThresholdingConfigFactory;
+import org.opennms.netmgt.config.dao.thresholding.api.OverrideableThreshdDAO;
 import org.opennms.netmgt.dao.api.InterfaceToNodeCache;
 import org.opennms.netmgt.dao.api.NodeDao;
 import org.opennms.netmgt.dao.mock.EventAnticipator;
@@ -147,6 +147,9 @@ public class ThresholdingIT {
 
     private int port = 50001;
 
+    // TODO: Wire
+    public OverrideableThreshdDAO threshdDAO = null;
+    
     @Before
     public void setUp() throws IOException {
         rrdBaseDir = tempFolder.newFolder("rrd");
@@ -179,7 +182,7 @@ public class ThresholdingIT {
 
         // Load custom threshd configuration
         initThreshdFactories("/threshd-configuration.xml", "/thresholds.xml");
-        ThreshdConfigFactory.getInstance().rebuildPackageIpListMap();
+        threshdDAO.getIpMap().rebuildPackageIpListMap();
         mockEventIpcManager.addEventListener((EventListener) thresholdingService, ThresholdingServiceImpl.UEI_LIST);
 
         // Compute the path to the RRD file
@@ -355,7 +358,7 @@ public class ThresholdingIT {
 
     private void initThreshdFactories(String threshd, String thresholds) throws Exception {
         ThresholdingConfigFactory.setInstance(new ThresholdingConfigFactory(getClass().getResourceAsStream(thresholds)));
-        ThreshdConfigFactory.setInstance(new ThreshdConfigFactory(getClass().getResourceAsStream(threshd)));
+        threshdDAO.overrideConfig(getClass().getResourceAsStream(threshd));
     }
 
 }

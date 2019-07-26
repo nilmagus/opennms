@@ -43,6 +43,7 @@
 	org.opennms.web.api.Util,
 	java.net.*
 "%>
+<%@ page import="org.opennms.netmgt.config.dao.thresholding.api.WriteableThreshdDAO" %>
 
 <%!public void sendOutagesChangedEvent() throws ServletException {
 		Event event = new Event();
@@ -62,6 +63,9 @@
 		}
 	}%>
 <%
+	// TODO: Wire this in
+	WriteableThreshdDAO threshdDAO = null;
+
 	NotifdConfigFactory.init(); //Must do this early on - if it fails, then just throw the exception to the web gui
 	PollOutagesConfigFactory.init(); // Only init - do *not* reload
 	PollOutagesConfigFactory pollFactory = PollOutagesConfigFactory.getInstance();
@@ -71,7 +75,7 @@
 		try {
 			pollFactory.removeOutage(deleteName);
 			//Remove from all the package configurations as well
-			for (final org.opennms.netmgt.config.threshd.Package thisPackage : ThreshdConfigFactory.getInstance().getConfiguration().getPackages()) {
+			for (final org.opennms.netmgt.config.threshd.Package thisPackage : threshdDAO.getConfig().getPackages()) {
 				thisPackage.removeOutageCalendar(deleteName); //Will quietly do nothing if outage doesn't exist
 			}
 	
@@ -88,7 +92,7 @@
 	
 			pollFactory.saveCurrent();
 			NotifdConfigFactory.getInstance().saveCurrent();
-			ThreshdConfigFactory.getInstance().saveCurrent();
+			threshdDAO.saveConfig();
 			collectdConfig.saveCurrent();
 			PollerConfigFactory.getInstance().save();
 			sendOutagesChangedEvent();
@@ -162,10 +166,9 @@
 					for (final org.opennms.netmgt.config.poller.Package pkg : PollerConfigFactory.getInstance().getConfiguration().getPackages()) {
 						pollingOutages.addAll(pkg.getOutageCalendars());
 					}
-			
-					ThreshdConfigFactory.init();
+
 					List<String> thresholdingOutages = new ArrayList<>();
-					for (final org.opennms.netmgt.config.threshd.Package thisPackage : ThreshdConfigFactory.getInstance().getConfiguration().getPackages()) {
+					for (final org.opennms.netmgt.config.threshd.Package thisPackage : threshdDAO.getConfig().getPackages()) {
 						thresholdingOutages.addAll(thisPackage.getOutageCalendars());
 					}
 			

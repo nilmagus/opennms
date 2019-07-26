@@ -926,6 +926,11 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
+      <dependency>
+          <groupId>org.opennms</groupId>
+          <artifactId>org.opennms.config-dao.thresholding.api</artifactId>
+          <version>${project.version}</version>
+      </dependency>
   </dependencies>
 
   <pluginRepositories>

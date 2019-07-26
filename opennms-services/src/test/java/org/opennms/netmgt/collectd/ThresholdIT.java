@@ -60,8 +60,8 @@ import org.opennms.netmgt.collection.support.DefaultServiceCollectorRegistry;
 import org.opennms.netmgt.collection.support.builder.CollectionSetBuilder;
 import org.opennms.netmgt.collection.support.builder.NodeLevelResource;
 import org.opennms.netmgt.config.CollectdConfigFactory;
-import org.opennms.netmgt.config.ThreshdConfigFactory;
 import org.opennms.netmgt.config.ThresholdingConfigFactory;
+import org.opennms.netmgt.config.dao.thresholding.api.OverrideableThreshdDAO;
 import org.opennms.netmgt.dao.api.CategoryDao;
 import org.opennms.netmgt.dao.api.IpInterfaceDao;
 import org.opennms.netmgt.dao.api.NodeDao;
@@ -143,6 +143,9 @@ public class ThresholdIT implements TemporaryDatabaseAware<MockDatabase> {
 
     @Autowired
     private ThresholdingService thresholdingService;
+    
+    // Wire in
+    private OverrideableThreshdDAO threshdDAO = null;
 
     @Test
     public void canTriggerThreshold() throws Exception {
@@ -157,7 +160,7 @@ public class ThresholdIT implements TemporaryDatabaseAware<MockDatabase> {
 
         // Load custom threshd configuration
         initThreshdFactories("threshd-configuration.xml","test-thresholds.xml");
-        ThreshdConfigFactory.getInstance().rebuildPackageIpListMap();
+//        ThreshdConfigFactory.getInstance().rebuildPackageIpListMap();
         mockEventIpcManager.addEventListener((EventListener) thresholdingService, ThresholdingServiceImpl.UEI_LIST);
 
         // Wire and initialize collectd
@@ -274,7 +277,7 @@ public class ThresholdIT implements TemporaryDatabaseAware<MockDatabase> {
 
     private void initThreshdFactories(String threshd, String thresholds) throws Exception {
         ThresholdingConfigFactory.setInstance(new ThresholdingConfigFactory(getClass().getResourceAsStream(thresholds)));
-        ThreshdConfigFactory.setInstance(new ThreshdConfigFactory(getClass().getResourceAsStream(threshd)));
+        threshdDAO.overrideConfig(getClass().getResourceAsStream(threshd));
     }
 
     @Override

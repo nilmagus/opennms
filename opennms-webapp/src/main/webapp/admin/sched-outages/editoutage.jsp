@@ -32,27 +32,42 @@
 <%@page language="java"
         contentType="text/html"
         session="true"
-        import="java.util.*,
-        org.opennms.netmgt.config.*,
-        org.opennms.netmgt.config.collectd.Package,
-        org.opennms.netmgt.config.poller.*,
-        org.opennms.netmgt.config.poller.outages.*,
-        org.opennms.core.db.DataSourceFactory,
-        org.opennms.core.utils.DBUtils,
-        org.opennms.core.utils.WebSecurityUtils,
-        org.opennms.web.element.*,
-        org.opennms.netmgt.dao.hibernate.PathOutageManagerDaoImpl,
-        org.opennms.netmgt.model.OnmsNode,
-        org.opennms.netmgt.events.api.EventConstants,
-        org.opennms.netmgt.xml.event.Event,
-        org.opennms.web.api.Util,
-        java.net.*,
-        java.io.*,
-        java.sql.*,
+        import="java.io.CharArrayReader,
+        java.io.CharArrayWriter,
+        java.net.InetAddress,
+        java.net.UnknownHostException,
+        java.sql.SQLException,
         java.text.NumberFormat,
-        java.text.SimpleDateFormat
+        java.text.SimpleDateFormat,
+        java.util.ArrayList,
+        java.util.Calendar,
+        java.util.Collection,
+        java.util.Collections,
+        java.util.Comparator,
+        java.util.Enumeration,
+        java.util.GregorianCalendar,
+        java.util.HashMap,
+        java.util.HashSet,
+        java.util.List,
+        java.util.Locale,
+        java.util.Map
         "
 %>
+<%@ page import="java.util.Set" %>
+<%@ page import="org.opennms.core.utils.WebSecurityUtils" %>
+<%@ page import="org.opennms.netmgt.config.CollectdConfigFactory" %>
+<%@ page import="org.opennms.netmgt.config.NotifdConfigFactory" %>
+<%@ page import="org.opennms.netmgt.config.PollOutagesConfigFactory" %>
+<%@ page import="org.opennms.netmgt.config.PollerConfigFactory" %>
+<%@ page import="org.opennms.netmgt.config.collectd.Package" %>
+<%@ page import="org.opennms.netmgt.config.dao.thresholding.api.WriteableThreshdDAO" %>
+<%@ page import="org.opennms.netmgt.config.poller.outages.Outage" %>
+<%@ page import="org.opennms.netmgt.dao.hibernate.PathOutageManagerDaoImpl" %>
+<%@ page import="org.opennms.netmgt.events.api.EventConstants" %>
+<%@ page import="org.opennms.netmgt.model.OnmsNode" %>
+<%@ page import="org.opennms.netmgt.xml.event.Event" %>
+<%@ page import="org.opennms.web.api.Util" %>
+<%@ page import="org.opennms.web.element.NetworkElementFactory" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 
@@ -284,10 +299,12 @@ Could not find an outage to edit because no outage name parameter was specified 
 		enabledOutages.add("notifications");
 	}
 
+	// TODO: Ge this wired in
+	WriteableThreshdDAO threshdDAO = null;
+	
 	// ******* Threshd outages config *********
-	ThreshdConfigFactory.init();
 	Map<org.opennms.netmgt.config.threshd.Package, List<String>> thresholdOutages = new HashMap<org.opennms.netmgt.config.threshd.Package, List<String>>();
-	for (org.opennms.netmgt.config.threshd.Package thisPackage : ThreshdConfigFactory.getInstance().getConfiguration().getPackages()) {
+	for (org.opennms.netmgt.config.threshd.Package thisPackage : threshdDAO.getConfig().getPackages()) {
 		thresholdOutages.put(thisPackage, thisPackage.getOutageCalendars());
 		if (thisPackage.getOutageCalendars().contains(theOutage.getName())) {
 			enabledOutages.add("threshold-" + thisPackage.getName());
@@ -445,7 +462,7 @@ Could not find an outage to edit because no outage name parameter was specified 
 				//Save to disk	
 				pollFactory.saveCurrent();
 				NotifdConfigFactory.getInstance().saveCurrent();
-				ThreshdConfigFactory.getInstance().saveCurrent();
+				threshdDAO.saveConfig();
 				collectdConfig.saveCurrent();
 				PollerConfigFactory.getInstance().save();
 				sendOutagesChangedEvent();

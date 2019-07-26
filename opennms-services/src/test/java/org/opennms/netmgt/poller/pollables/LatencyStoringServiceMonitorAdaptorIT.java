@@ -55,8 +55,8 @@ import org.opennms.core.test.db.annotations.JUnitTemporaryDatabase;
 import org.opennms.netmgt.collection.api.PersisterFactory;
 import org.opennms.netmgt.config.PollOutagesConfigFactory;
 import org.opennms.netmgt.config.PollerConfig;
-import org.opennms.netmgt.config.ThreshdConfigFactory;
 import org.opennms.netmgt.config.ThresholdingConfigFactory;
+import org.opennms.netmgt.config.dao.thresholding.api.ReadableThreshdDAO;
 import org.opennms.netmgt.config.poller.Package;
 import org.opennms.netmgt.config.poller.Rrd;
 import org.opennms.netmgt.dao.api.MonitoringLocationDao;
@@ -108,6 +108,9 @@ public class LatencyStoringServiceMonitorAdaptorIT implements TemporaryDatabaseA
 
     @Autowired
     private ThresholdingService m_thresholdingService;
+    
+    // TODO: Wire
+    private ReadableThreshdDAO threshdDAO = null;
 
     @Override
     public void setTemporaryDatabase(MockDatabase database) {
@@ -141,7 +144,7 @@ public class LatencyStoringServiceMonitorAdaptorIT implements TemporaryDatabaseA
         String previousOpennmsHome = System.setProperty("opennms.home", "src/test/resources");
         PollOutagesConfigFactory.init();
         ThresholdingConfigFactory.reload();
-        ThreshdConfigFactory.reload();
+        threshdDAO.reload();
         System.setProperty("opennms.home", previousOpennmsHome);
 
         MockNetwork network = new MockNetwork();
@@ -252,7 +255,7 @@ public class LatencyStoringServiceMonitorAdaptorIT implements TemporaryDatabaseA
                                                                                               m_thresholdingService);
         // Make sure that the ThresholdingSet initializes with test settings
         String previousOpennmsHome = System.setProperty("opennms.home", "src/test/resources");
-        ThreshdConfigFactory.getInstance().rebuildPackageIpListMap();
+        threshdDAO.getIpMap().rebuildPackageIpListMap();
 
         for (int i=0; i<rtValues.length; i++) {
             adaptor.handlePollResult(svc, parameters, service.poll(svc, parameters));

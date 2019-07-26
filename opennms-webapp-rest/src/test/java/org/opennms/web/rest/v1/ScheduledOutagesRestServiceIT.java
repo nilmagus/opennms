@@ -54,7 +54,7 @@ import org.opennms.netmgt.config.CollectdConfigFactory;
 import org.opennms.netmgt.config.NotifdConfigFactory;
 import org.opennms.netmgt.config.PollOutagesConfigManager;
 import org.opennms.netmgt.config.PollerConfigFactory;
-import org.opennms.netmgt.config.ThreshdConfigFactory;
+import org.opennms.netmgt.config.dao.thresholding.api.OverrideableThreshdDAO;
 import org.opennms.netmgt.config.poller.outages.Outage;
 import org.opennms.netmgt.config.poller.outages.Outages;
 import org.opennms.netmgt.filter.FilterDaoFactory;
@@ -95,6 +95,9 @@ public class ScheduledOutagesRestServiceIT extends AbstractSpringJerseyRestTestC
 
     @Autowired
     private PollOutagesConfigManager m_pollOutagesConfigManager;
+    
+    // TODO: Wire
+    private OverrideableThreshdDAO threshdDAO = null;
 
     @Override
     protected void beforeServletStart() throws Exception {
@@ -173,7 +176,7 @@ public class ScheduledOutagesRestServiceIT extends AbstractSpringJerseyRestTestC
                 + "</service>"
                 + "</package>"
                 + "</threshd-configuration>");
-        ThreshdConfigFactory.setInstance(new ThreshdConfigFactory(new FileInputStream(threshdConfig)));
+        threshdDAO.overrideConfig(new FileInputStream(threshdConfig));
 
         // Setup Notifid Configuration
         FileUtils.writeStringToFile(new File(etc, "notifd-configuration.xml"), "<?xml version=\"1.0\"?>"

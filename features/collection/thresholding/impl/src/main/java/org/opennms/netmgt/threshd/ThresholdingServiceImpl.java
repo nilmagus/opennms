@@ -34,8 +34,8 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 
 import org.opennms.netmgt.collection.api.ServiceParameters;
-import org.opennms.netmgt.config.ThreshdConfigFactory;
 import org.opennms.netmgt.config.ThresholdingConfigFactory;
+import org.opennms.netmgt.config.dao.thresholding.api.ReadableThreshdDAO;
 import org.opennms.netmgt.dao.api.ResourceStorageDao;
 import org.opennms.netmgt.events.api.EventConstants;
 import org.opennms.netmgt.events.api.EventIpcManager;
@@ -78,12 +78,15 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
 
     @Autowired
     private EventIpcManager eventIpcManager;
+    
+    // TODO: Wire
+    private ReadableThreshdDAO threshdDAO;
 
     @PostConstruct
     private void init() {
         try {
-            ThreshdConfigFactory.init();
-            ThresholdingConfigFactory.init();
+//            ThreshdConfigFactory.init();
+//            ThresholdingConfigFactory.init();
             eventIpcManager.addEventListener(this, UEI_LIST);
         } catch (final Exception e) {
             throw new RuntimeException("Unable to initialize thresholding.", e);
@@ -119,14 +122,14 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
     public void nodeGainedService(Event event) {
         LOG.debug(event.toString());
         // Trigger re-evaluation of Threshold Packages, re-evaluating Filters.
-        ThreshdConfigFactory.getInstance().rebuildPackageIpListMap();
+        threshdDAO.getIpMap().rebuildPackageIpListMap();
         reinitializeThresholdingSets(event);
     }
 
     public void handleNodeCategoryChanged(Event event) {
         LOG.debug(event.toString());
         // Trigger re-evaluation of Threshold Packages, re-evaluating Filters.
-        ThreshdConfigFactory.getInstance().rebuildPackageIpListMap();
+        threshdDAO.getIpMap().rebuildPackageIpListMap();
         reinitializeThresholdingSets(event);
     }
 
@@ -187,7 +190,7 @@ public class ThresholdingServiceImpl implements ThresholdingService, EventListen
         }
         if (isThresholds) {
             try {
-                ThreshdConfigFactory.reload();
+                threshdDAO.reload();
                 ThresholdingConfigFactory.reload();
                 thresholdingSetPersister.reinitializeThresholdingSets();
             } catch (final Exception e) {

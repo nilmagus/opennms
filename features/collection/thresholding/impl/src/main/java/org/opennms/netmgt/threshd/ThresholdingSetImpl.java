@@ -50,9 +50,8 @@ import org.opennms.netmgt.collection.api.CollectionAttribute;
 import org.opennms.netmgt.collection.api.CollectionResource;
 import org.opennms.netmgt.collection.api.ServiceParameters;
 import org.opennms.netmgt.config.PollOutagesConfigFactory;
-import org.opennms.netmgt.config.ThreshdConfigFactory;
-import org.opennms.netmgt.config.ThreshdConfigManager;
 import org.opennms.netmgt.config.ThresholdingConfigFactory;
+import org.opennms.netmgt.config.dao.thresholding.api.ReadableThreshdDAO;
 import org.opennms.netmgt.config.poller.outages.Outage;
 import org.opennms.netmgt.config.threshd.FilterOperator;
 import org.opennms.netmgt.config.threshd.ResourceFilter;
@@ -94,6 +93,9 @@ public class ThresholdingSetImpl implements ThresholdingSet {
 
     protected final List<ThresholdGroup> m_thresholdGroups = new LinkedList<>();
     protected final List<String> m_scheduledOutages = new ArrayList<>();
+    
+    // TODO: Wiring
+    private final ReadableThreshdDAO threshdDAO = null;
 
     public ThresholdingSetImpl(int nodeId, String hostAddress, String serviceName, RrdRepository repository, ServiceParameters svcParams, ResourceStorageDao resourceStorageDao,
             ThresholdingEventProxy eventProxy)
@@ -399,13 +401,13 @@ public class ThresholdingSetImpl implements ThresholdingSet {
                 LOG.error("initThresholdsDao: " + tie.getLocalizedMessage(), t);
                 throw tie;
             }
-            try {
-                ThreshdConfigFactory.init();
-            } catch (final Throwable t) {
-                final ThresholdInitializationException tie = new ThresholdInitializationException("Could not initialize ThreshdConfigFactory.", t);
-                LOG.error("initThresholdsDao: " + tie.getLocalizedMessage(), t);
-                throw tie;
-            }
+//            try {
+//                ThreshdConfigFactory.init();
+//            } catch (final Throwable t) {
+//                final ThresholdInitializationException tie = new ThresholdInitializationException("Could not initialize ThreshdConfigFactory.", t);
+//                LOG.error("initThresholdsDao: " + tie.getLocalizedMessage(), t);
+//                throw tie;
+//            }
             m_thresholdsDao = defaultThresholdsDao;
             m_initialized = true;
         }
@@ -418,29 +420,30 @@ public class ThresholdingSetImpl implements ThresholdingSet {
      * - Compare interface/service pair against each Threshd package.
      * - For each match, create new ThresholdableService object and schedule it for collection
      */
-    private static final List<String> getThresholdGroupNames(int nodeId, String hostAddress, String serviceName) throws ThresholdInitializationException {
+    private final List<String> getThresholdGroupNames(int nodeId, String hostAddress, String serviceName) throws ThresholdInitializationException {
         List<String> groupNameList = new LinkedList<>();
 
-        ThreshdConfigManager configManager = null;
+//        ThreshdConfigManager configManager = null;
+//
+//        try { 
+//            configManager = ThreshdConfigFactory.getInstance();
+//        } catch (final IllegalStateException e) {
+//            throw new ThresholdInitializationException(e);
+//        }
 
-        try { 
-            configManager = ThreshdConfigFactory.getInstance();
-        } catch (final IllegalStateException e) {
-            throw new ThresholdInitializationException(e);
-        }
-
-        if (configManager != null) {
-            for (org.opennms.netmgt.config.threshd.Package pkg : configManager.getConfiguration().getPackages()) {
+//        if (configManager != null) {
+            for (org.opennms.netmgt.config.threshd.Package pkg : threshdDAO.getConfig().getPackages()) {
 
                 // Make certain the the current service is in the package and enabled!
-                if (!configManager.serviceInPackageAndEnabled(serviceName, pkg)) {
+                if (!threshdDAO.getConfig().serviceInPackageAndEnabled(serviceName, pkg)) {
                     LOG.debug("getThresholdGroupNames: address/service: {}/{} not scheduled, service is not enabled or does not exist in package: {}", hostAddress, serviceName, pkg.getName());
                     continue;
                 }
 
                 // Is the interface in the package?
+                // TODO
                 LOG.debug("getThresholdGroupNames: checking ipaddress {} for inclusion in pkg {}", hostAddress, pkg.getName());
-                if (!configManager.interfaceInPackage(hostAddress, pkg)) {
+                if (!threshdDAO.getIpMap().interfaceInPackage(hostAddress, pkg)) {
                     LOG.debug("getThresholdGroupNames: address/service: {}/{} not scheduled, interface does not belong to package: {}", hostAddress, serviceName, pkg.getName());
                     continue;
                 }
@@ -458,22 +461,22 @@ public class ThresholdingSetImpl implements ThresholdingSet {
                     }
                 }
             }
-        }
+//        }
         return groupNameList;
     }
 
     protected void updateScheduledOutages() throws ThresholdInitializationException {
         synchronized (m_scheduledOutages) {
             m_scheduledOutages.clear();
-            ThreshdConfigManager configManager = null;
-            try {
-                configManager = ThreshdConfigFactory.getInstance();
-            } catch (final IllegalStateException e) {
-                final ThresholdInitializationException tie = new ThresholdInitializationException("Failed to get threshd configuration factory while attempting to update scheduled outages.", e);
-                LOG.error(tie.getLocalizedMessage(), e);
-                throw tie;
-            }
-            for (org.opennms.netmgt.config.threshd.Package pkg : configManager.getConfiguration().getPackages()) {
+//            ThreshdConfigManager configManager = null;
+//            try {
+//                configManager = ThreshdConfigFactory.getInstance();
+//            } catch (final IllegalStateException e) {
+//                final ThresholdInitializationException tie = new ThresholdInitializationException("Failed to get threshd configuration factory while attempting to update scheduled outages.", e);
+//                LOG.error(tie.getLocalizedMessage(), e);
+//                throw tie;
+//            }
+            for (org.opennms.netmgt.config.threshd.Package pkg : threshdDAO.getConfig().getPackages()) {
                 for (String outageCal : pkg.getOutageCalendars()) {
                     LOG.info("updateScheduledOutages[node={}]: checking scheduled outage '{}'", m_nodeId, outageCal);
                     try {

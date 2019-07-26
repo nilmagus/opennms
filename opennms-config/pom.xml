@@ -100,5 +100,10 @@
       <groupId>com.googlecode.concurrent-locks</groupId>
       <artifactId>concurrent-locks</artifactId>
     </dependency>
+      <dependency>
+          <groupId>org.opennms</groupId>
+          <artifactId>org.opennms.config-dao.thresholding.api</artifactId>
+          <version>${project.version}</version>
+      </dependency>
   </dependencies>
 </project>

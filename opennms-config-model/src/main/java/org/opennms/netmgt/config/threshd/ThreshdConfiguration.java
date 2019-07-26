@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -73,7 +74,7 @@ public class ThreshdConfiguration implements Serializable {
     private List<Thresholder> m_thresholders = new ArrayList<>();
 
     public ThreshdConfiguration() { }
-
+    
     public Integer getThreads() {
         return m_threads;
     }
@@ -90,6 +91,12 @@ public class ThreshdConfiguration implements Serializable {
         if (packages == m_packages) return;
         m_packages.clear();
         if (packages != null) m_packages.addAll(packages);
+    }
+
+    public Optional<Package> getPackage(String packageName) {
+        return getPackages().stream()
+                .filter(p -> Objects.equals(packageName, p.getName()))
+                .findFirst();
     }
 
     public void addPackage(final Package p) {
@@ -118,6 +125,34 @@ public class ThreshdConfiguration implements Serializable {
         return m_thresholders.remove(thresholder);
     }
 
+    /**
+     * Returns true if the service is part of the package and the status of the
+     * service is set to "on". Returns false if the service is not in the
+     * package or it is but the status of the service is set to "off".
+     *
+     * @param svcName
+     *            The service name to lookup.
+     * @param pkg
+     *            The package to lookup up service.
+     * @return a boolean.
+     */
+    public synchronized boolean serviceInPackageAndEnabled(String svcName, Package pkg) {
+        boolean result = false;
+
+        for (Service tsvc : pkg.getServices()) {
+            if (tsvc.getName().equalsIgnoreCase(svcName)) {
+                // Ok its in the package. Now check the
+                // status of the service
+                final ServiceStatus status = tsvc.getStatus().orElse(ServiceStatus.OFF);
+                if (status == ServiceStatus.ON) {
+                    result = true;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
     @Override
     public int hashCode() {
         return Objects.hash(m_threads, 

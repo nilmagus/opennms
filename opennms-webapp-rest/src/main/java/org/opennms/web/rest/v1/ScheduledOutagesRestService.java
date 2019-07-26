@@ -47,8 +47,8 @@ import org.opennms.netmgt.config.CollectdConfigFactory;
 import org.opennms.netmgt.config.NotifdConfigFactory;
 import org.opennms.netmgt.config.PollOutagesConfigFactory;
 import org.opennms.netmgt.config.PollerConfigFactory;
-import org.opennms.netmgt.config.ThreshdConfigFactory;
 import org.opennms.netmgt.config.collectd.Package;
+import org.opennms.netmgt.config.dao.thresholding.api.WriteableThreshdDAO;
 import org.opennms.netmgt.config.poller.outages.Outage;
 import org.opennms.netmgt.config.poller.outages.Outages;
 import org.opennms.netmgt.events.api.EventConstants;
@@ -106,6 +106,9 @@ public class ScheduledOutagesRestService extends OnmsRestService {
     @Autowired
     @Qualifier("eventProxy")
     protected EventProxy m_eventProxy;
+    
+    // TODO: Wire this in
+    private WriteableThreshdDAO threshdDao = null;
 
     @GET
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON, MediaType.APPLICATION_ATOM_XML})
@@ -404,21 +407,21 @@ public class ScheduledOutagesRestService extends OnmsRestService {
             pkg.removeOutageCalendar(outageName);
         }
         if (action.equals(ConfigAction.REMOVE_FROM_ALL)) {
-            for (org.opennms.netmgt.config.threshd.Package pkg : ThreshdConfigFactory.getInstance().getConfiguration().getPackages()) {
+            for (org.opennms.netmgt.config.threshd.Package pkg : threshdDao.getConfig().getPackages()) {
                 pkg.removeOutageCalendar(outageName);
             }
         }
         try {
-            ThreshdConfigFactory.getInstance().saveCurrent();
+            threshdDao.saveConfig();
         } catch (Exception e) {
             throw getException(Status.INTERNAL_SERVER_ERROR, "Can't save thresholds configuration: {}", e.getMessage());
         }
     }
 
-    private static org.opennms.netmgt.config.threshd.Package getThreshdPackage(String packageName) {
-        org.opennms.netmgt.config.threshd.Package pkg = ThreshdConfigFactory.getInstance().getPackage(packageName);
-        if (pkg == null) throw getException(Status.NOT_FOUND, "Threshold package {} does not exist.", packageName);
-        return pkg;
+    private org.opennms.netmgt.config.threshd.Package getThreshdPackage(String packageName) {
+        return threshdDao.getConfig()
+                .getPackage(packageName)
+                .orElseThrow(() -> getException(Status.NOT_FOUND, "Threshold package {} does not exist.", packageName));
     }
 
     private void updateNotifd(ConfigAction action, String outageName) {
