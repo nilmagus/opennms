@@ -1015,7 +1015,7 @@
         <details>Feature definition to start all required bundles related to *flow-support.</details>
         <feature>opennms-health</feature>
         <feature>opennms-jest</feature>
-        <feature>netty</feature>
+        <feature version="${netty4Version}">netty</feature>
         <feature>quartz</feature>
         <feature>opennms-core-tracing</feature>
         <feature>opennms-distributed-core-api</feature>

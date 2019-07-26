@@ -86,7 +86,7 @@
     <feature name="sentinel-telemetry" description="OpenNMS :: Sentinel :: Telemetry" version="${project.version}">
         <feature>sentinel-persistence</feature>
 
-        <feature>netty</feature>
+        <feature version="${netty4Version}">netty</feature>
         <feature>dropwizard-metrics</feature>
         <!-- Needed to bootstrap opennms-core-ipc-sink-api Spring context -->
         <feature>camel-spring</feature>
