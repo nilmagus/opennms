@@ -944,7 +944,7 @@
     </feature>
     <feature name="opennms-telemetry-collection" version="${project.version}" description="OpenNMS :: Telemetry :: Collection">
         <feature>guava</feature>
-        <feature>camel-netty4</feature>
+        <feature version="${netty4Version}">netty4</feature>
         <feature>dropwizard-metrics</feature>
         <feature>opennms-collection-api</feature>
         <feature>opennms-thresholding-api</feature>
@@ -958,7 +958,7 @@
         <bundle>mvn:org.opennms.features.telemetry.protocols/org.opennms.features.telemetry.protocols.collection/${project.version}</bundle>
     </feature>
     <feature name="opennms-telemetry-daemon" version="${project.version}" description="OpenNMS :: Telemetry :: Daemon">
-        <feature>camel-netty4</feature>
+        <feature version="${netty4Version}">netty4</feature>
         <feature>camel-spring</feature>
         <feature>dropwizard-metrics</feature>
         <feature>opennms-core-daemon</feature>
@@ -1015,7 +1015,7 @@
         <details>Feature definition to start all required bundles related to *flow-support.</details>
         <feature>opennms-health</feature>
         <feature>opennms-jest</feature>
-        <feature version="${netty4Version}">netty</feature>
+        <feature version="${netty4Version}">netty4</feature>
         <feature>quartz</feature>
         <feature>opennms-core-tracing</feature>
         <feature>opennms-distributed-core-api</feature>
@@ -1461,7 +1461,7 @@
         <feature>guava</feature>
         <feature>dropwizard-metrics</feature>
         <feature>dnsjava</feature>
-        <feature version="${netty4Version}">netty</feature>
+        <feature version="${netty4Version}">netty4</feature>
         <feature>resilience4j</feature>
         <feature>opennms-events-api</feature>
         <feature>opennms-model</feature>
@@ -1477,7 +1477,7 @@
         <bundle>mvn:io.github.resilience4j/resilience4j-circuitbreaker/${resilience4jVersion}</bundle>
     </feature>
 
-    <feature name="netty" version="${netty4Version}" description="Netty">
+    <feature name="netty4" version="${netty4Version}" description="Netty">
         <bundle>mvn:io.netty/netty-resolver/${netty4Version}</bundle>
         <bundle>mvn:io.netty/netty-common/${netty4Version}</bundle>
         <bundle>mvn:io.netty/netty-buffer/${netty4Version}</bundle>
