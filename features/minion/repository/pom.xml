@@ -341,6 +341,16 @@
             <artifactId>org.opennms.protocols.xml</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.opennms.features.dnsresolver</groupId>
+            <artifactId>org.opennms.features.dnsresolver.netty</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opennms.features.dnsresolver</groupId>
+            <artifactId>org.opennms.features.dnsresolver.shell</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <repositories>
