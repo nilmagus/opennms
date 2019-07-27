@@ -842,6 +842,9 @@
                         "tcp_flags": {
                             "type": "integer"
                         },
+                        "timeout_switched": {
+                            "type": "date"
+                        },
                         "tos": {
                             "type": "keyword",
                             "norms": false
